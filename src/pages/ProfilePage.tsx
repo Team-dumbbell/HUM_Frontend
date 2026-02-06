@@ -105,9 +105,9 @@ export default function ProfilePage() {
     fetchAppData();
   }, [fetchAppData]);
 
-  const displayName = user.name && !user.name.includes("?") ? user.name : "김지훈";
-  const displayEmail = profile.email && profile.email.includes("@") ? profile.email : "jihon.kim@gmail.com";
-  const avatarText = user.avatarText && !user.avatarText.includes("?") ? user.avatarText : displayName[0] ?? "김";
+  const displayName = user.name.trim() || "HUM User";
+  const displayEmail = profile.email.trim() || "등록된 이메일이 없습니다.";
+  const avatarText = (user.avatarText.trim() || displayName.charAt(0) || "H").toUpperCase();
 
   const handleLogout = () => {
     logout();

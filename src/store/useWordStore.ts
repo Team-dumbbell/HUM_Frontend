@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { apiGet } from "../api/client";
+import { readProfileFromStoredToken, type TokenProfile } from "../auth/tokenProfile";
 import dummyData from "../data/dummy.json";
 
 type SortType = "latest" | "frequency" | "alphabet";
@@ -120,6 +121,8 @@ export const useWordStore = create<WordStore>((set, get) => ({
     })),
 
   fetchAppData: async () => {
+    const tokenProfile = readProfileFromStoredToken();
+
     try {
       const [profileRes, vocabularyRes, historyRes, wordsRes] = await Promise.all([
         apiGet<unknown>("/user/profile"),
@@ -193,7 +196,10 @@ export const useWordStore = create<WordStore>((set, get) => ({
 
       const profileWordCount = words.length;
       const profileTrackCount = tracks.length;
-      const displayName = readString(usersRow.name ?? usersRow.nickname ?? usersRow.username, "홍길동");
+      const displayName = readString(
+        usersRow.name ?? usersRow.nickname ?? usersRow.username,
+        tokenProfile?.name || "HUM User",
+      );
 
       set({
         wordList: words,
@@ -205,10 +211,10 @@ export const useWordStore = create<WordStore>((set, get) => ({
         },
         user: {
           name: displayName,
-          avatarText: displayName.charAt(0) || "홍",
+          avatarText: displayName.charAt(0).toUpperCase() || tokenProfile?.avatarText || "H",
         },
         profile: {
-          email: readString(usersRow.email, "user@example.com"),
+          email: readString(usersRow.email, tokenProfile?.email || ""),
           level: readString(settingsRow.level, "Beginner"),
           streakDays: readNumber(settingsRow.streak_days ?? settingsRow.streakDays, 0),
           favoriteLanguage: readString(settingsRow.favorite_language ?? settingsRow.language, "ENGLISH"),
@@ -217,7 +223,7 @@ export const useWordStore = create<WordStore>((set, get) => ({
         },
       });
     } catch {
-      applyDummyData(set);
+      applyDummyData(set, tokenProfile);
     }
   },
 
@@ -297,6 +303,7 @@ export const useWordStore = create<WordStore>((set, get) => ({
 
 function applyDummyData(
   set: (partial: Partial<WordStore> | ((state: WordStore) => Partial<WordStore>), replace?: false) => void,
+  tokenProfile: TokenProfile | null,
 ) {
   const words = (dummyData.words as WordItem[]) ?? [];
   const tracks = ((dummyData as { tracks?: TrackItem[] }).tracks ?? []) as TrackItem[];
@@ -320,18 +327,27 @@ function applyDummyData(
       totalCapturedWords: words.length,
       totalCapturedTracks: tracks.length,
     };
+  const mergedName = tokenProfile?.name || user.name || dashboard.greetingName || "HUM User";
+  const mergedAvatar = tokenProfile?.avatarText || mergedName.charAt(0).toUpperCase() || "H";
+  const mergedEmail = tokenProfile?.email || (profile.email === "user@example.com" ? "" : profile.email);
 
   set({
     wordList: words,
     trackList: tracks,
     dashboard: {
       ...dashboard,
+      greetingName: mergedName,
       totalWords: dashboard.totalWords || words.length,
       totalTracks: dashboard.totalTracks || tracks.length,
     },
-    user,
+    user: {
+      ...user,
+      name: mergedName,
+      avatarText: mergedAvatar,
+    },
     profile: {
       ...profile,
+      email: mergedEmail,
       totalCapturedWords: profile.totalCapturedWords || words.length,
       totalCapturedTracks: profile.totalCapturedTracks || tracks.length,
     },
