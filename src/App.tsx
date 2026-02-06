@@ -299,10 +299,36 @@ function App() {
               </FilterGroup>
             </>
           ) : null}
-          <SortSelect>
-            <FiList size={16} />
-            <span>정렬</span>
-          </SortSelect>
+          {selectedTrack ? (
+            <FilterActions>
+              <Pagination inline>
+                <PageBtn icon onClick={() => setDesktopPage((prev) => Math.max(1, prev - 1))} disabled={safeDesktopPage === 1}>
+                  <FiChevronLeft size={18} />
+                </PageBtn>
+                {Array.from({ length: totalDesktopPages }, (_, idx) => idx + 1).map((page) => (
+                  <PageBtn key={page} active={safeDesktopPage === page} onClick={() => setDesktopPage(page)}>
+                    {page}
+                  </PageBtn>
+                ))}
+                <PageBtn
+                  icon
+                  onClick={() => setDesktopPage((prev) => Math.min(totalDesktopPages, prev + 1))}
+                  disabled={safeDesktopPage === totalDesktopPages}
+                >
+                  <FiChevronsRight size={18} />
+                </PageBtn>
+              </Pagination>
+              <SortSelect>
+                <FiList size={16} />
+                <span>정렬</span>
+              </SortSelect>
+            </FilterActions>
+          ) : (
+            <SortSelect>
+              <FiList size={16} />
+              <span>정렬</span>
+            </SortSelect>
+          )}
         </FilterRow>
 
         <WordGrid>
@@ -311,23 +337,25 @@ function App() {
           ))}
         </WordGrid>
 
-        <Pagination>
-          <PageBtn icon onClick={() => setDesktopPage((prev) => Math.max(1, prev - 1))} disabled={safeDesktopPage === 1}>
-            <FiChevronLeft size={18} />
-          </PageBtn>
-          {Array.from({ length: totalDesktopPages }, (_, idx) => idx + 1).map((page) => (
-            <PageBtn key={page} active={safeDesktopPage === page} onClick={() => setDesktopPage(page)}>
-              {page}
+        {!selectedTrack ? (
+          <Pagination>
+            <PageBtn icon onClick={() => setDesktopPage((prev) => Math.max(1, prev - 1))} disabled={safeDesktopPage === 1}>
+              <FiChevronLeft size={18} />
             </PageBtn>
-          ))}
-          <PageBtn
-            icon
-            onClick={() => setDesktopPage((prev) => Math.min(totalDesktopPages, prev + 1))}
-            disabled={safeDesktopPage === totalDesktopPages}
-          >
-            <FiChevronsRight size={18} />
-          </PageBtn>
-        </Pagination>
+            {Array.from({ length: totalDesktopPages }, (_, idx) => idx + 1).map((page) => (
+              <PageBtn key={page} active={safeDesktopPage === page} onClick={() => setDesktopPage(page)}>
+                {page}
+              </PageBtn>
+            ))}
+            <PageBtn
+              icon
+              onClick={() => setDesktopPage((prev) => Math.min(totalDesktopPages, prev + 1))}
+              disabled={safeDesktopPage === totalDesktopPages}
+            >
+              <FiChevronsRight size={18} />
+            </PageBtn>
+          </Pagination>
+        ) : null}
       </Content>
       <HelpButton>?</HelpButton>
     </WebShell>
@@ -482,6 +510,13 @@ const SortSelect = styled.button`
   align-items: center;
   gap: 8px;
   cursor: pointer;
+`;
+
+const FilterActions = styled.div`
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
 `;
 
 const SelectedTrackCard = styled.article<{ mobile?: boolean }>`
