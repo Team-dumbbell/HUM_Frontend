@@ -17,7 +17,8 @@ export default function AppRouter() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/words" element={<App />} />
           <Route path="/tracks" element={<TrackListPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/mypage" element={<ProfilePage />} />
+          <Route path="/profile" element={<Navigate to="/mypage" replace />} />
           <Route path="/words/:wordId" element={<WordDetailPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />

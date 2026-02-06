@@ -14,7 +14,7 @@ const menus: Menu[] = [
   { id: "dashboard", label: "대시보드", icon: FiHome, path: "/dashboard" },
   { id: "vocab", label: "단어장", icon: FiBookOpen, path: "/words" },
   { id: "track", label: "트랙", icon: FiMusic, path: "/tracks" },
-  { id: "profile", label: "프로필", icon: FiUser, path: "/profile" },
+  { id: "profile", label: "프로필", icon: FiUser, path: "/mypage" },
 ];
 
 export default function MobileBottomNav() {
@@ -25,7 +25,7 @@ export default function MobileBottomNav() {
     if (id === "track") return pathname.startsWith("/tracks");
     if (id === "vocab") return pathname.startsWith("/words");
     if (id === "dashboard") return pathname.startsWith("/dashboard");
-    return pathname.startsWith("/profile");
+    return pathname.startsWith("/mypage") || pathname.startsWith("/profile");
   };
 
   return (

@@ -38,7 +38,7 @@ const Input = styled.input`
   outline: none;
   background: transparent;
   color: ${({ theme }) => theme.color.text};
-  font-size: 15px;
+  font-size: 16px;
 
   &::placeholder {
     color: #a3aec0;

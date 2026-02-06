@@ -5,7 +5,7 @@ import { FiBookOpen, FiHome, FiMusic, FiUser } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
 
 type Menu = {
-  id: "dashboard" | "vocab" | "track" | "profile";
+  id: "dashboard" | "vocab" | "track";
   label: string;
   icon: ComponentType<{ size?: number }>;
   path: string;
@@ -15,7 +15,6 @@ const menus: Menu[] = [
   { id: "dashboard", label: "대시보드", icon: FiHome, path: "/dashboard" },
   { id: "vocab", label: "단어장", icon: FiBookOpen, path: "/words" },
   { id: "track", label: "트랙 로그", icon: FiMusic, path: "/tracks" },
-  { id: "profile", label: "프로필", icon: FiUser, path: "/profile" },
 ];
 
 export default function WebSidebar() {
@@ -25,7 +24,6 @@ export default function WebSidebar() {
   const isActive = (id: Menu["id"]) => {
     if (id === "track") return pathname.startsWith("/tracks");
     if (id === "vocab") return pathname.startsWith("/words");
-    if (id === "profile") return pathname.startsWith("/profile");
     return pathname.startsWith("/dashboard");
   };
 
@@ -56,7 +54,7 @@ export default function WebSidebar() {
       </Nav>
 
       <Footer>
-        <FooterItem onClick={() => navigate("/profile")} type="button">
+        <FooterItem onClick={() => navigate("/mypage")} type="button">
           <FiUser size={18} />
           <span>마이페이지</span>
         </FooterItem>

@@ -31,7 +31,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "dashboard", label: "대시보드", path: "/dashboard", icon: FiHome },
   { id: "words", label: "단어장", path: "/words", icon: FiBookOpen },
   { id: "tracks", label: "트랙", path: "/tracks", icon: FiMusic },
-  { id: "profile", label: "프로필", path: "/profile", icon: FiUser },
+  { id: "profile", label: "프로필", path: "/mypage", icon: FiUser },
 ];
 
 export default function DashboardPage() {
@@ -188,7 +188,7 @@ function MobileDashboard() {
     if (id === "words") return pathname.startsWith("/words");
     if (id === "tracks") return pathname.startsWith("/tracks");
     if (id === "dashboard") return pathname.startsWith("/dashboard");
-    return pathname.startsWith("/profile");
+    return pathname.startsWith("/mypage") || pathname.startsWith("/profile");
   };
 
   return (
@@ -318,7 +318,7 @@ const UserArea = styled.div`
 const UserName = styled.span`
   color: ${({ theme }) => theme.color.text};
   font-weight: 700;
-  font-size: 32px;
+  font-size: 24px;
 `;
 
 const Avatar = styled.div`
@@ -342,7 +342,7 @@ const Greeting = styled.p`
   margin: 0;
   color: ${({ theme }) => theme.color.blue};
   font-weight: 700;
-  font-size: 16px;
+  font-size: 14px;
 
   span {
     margin-left: 2px;
@@ -352,7 +352,7 @@ const Greeting = styled.p`
 const Title = styled.h1<{ mobile?: boolean }>`
   margin: 8px 0 0;
   color: #061234;
-  font-size: ${({ mobile }) => (mobile ? "20px" : "46px")};
+  font-size: ${({ mobile }) => (mobile ? "18px" : "34px")};
   letter-spacing: -0.03em;
 `;
 
@@ -395,14 +395,14 @@ const StatIcon = styled.span<{ tone: "blue" | "orange" }>`
 
 const StatLabel = styled.span`
   color: #9ba8be;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
 `;
 
 const StatValue = styled.p<{ mobile?: boolean }>`
   margin: 12px 0 0;
   color: #061234;
-  font-size: ${({ mobile }) => (mobile ? "36px" : "44px")};
+  font-size: ${({ mobile }) => (mobile ? "28px" : "34px")};
   font-weight: 800;
   letter-spacing: -0.03em;
 `;
@@ -421,7 +421,7 @@ const SectionHead = styled.div`
 const SectionTitle = styled.h2`
   margin: 0;
   color: #061234;
-  font-size: 44px;
+  font-size: 28px;
   letter-spacing: -0.03em;
 
   @media (max-width: 1023px) {
@@ -431,7 +431,7 @@ const SectionTitle = styled.h2`
 
 const ViewAllLink = styled.a`
   color: #91a3c7;
-  font-size: 28px;
+  font-size: 14px;
   font-weight: 700;
   text-decoration: none;
 
@@ -472,7 +472,7 @@ const WordTop = styled.div`
 const WordName = styled.h3`
   margin: 0;
   color: #061234;
-  font-size: 20px;
+  font-size: 18px;
 `;
 
 const PartBadge = styled.span`
@@ -489,7 +489,7 @@ const PartBadge = styled.span`
 const WordMeaning = styled.p`
   margin: 8px 0 0;
   color: ${({ theme }) => theme.color.blue};
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
 `;
 
@@ -528,14 +528,14 @@ const TrackInfo = styled.div`
 const TrackTitle = styled.h3`
   margin: 0;
   color: #061234;
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1.2;
 `;
 
 const TrackArtist = styled.p`
   margin: 4px 0 0;
   color: #7f8ca7;
-  font-size: 16px;
+  font-size: 14px;
 `;
 
 const MobileWrap = styled.div`
@@ -581,3 +581,4 @@ const BottomNavItem = styled.button<{ active?: boolean }>`
   font-weight: ${({ active }) => (active ? 700 : 600)};
   cursor: pointer;
 `;
+
