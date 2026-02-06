@@ -139,6 +139,12 @@ function App() {
   }, [desktopPage, totalDesktopPages]);
 
   useEffect(() => {
+    if (desktopPage !== safeDesktopPage) {
+      setDesktopPage(safeDesktopPage);
+    }
+  }, [desktopPage, safeDesktopPage]);
+
+  useEffect(() => {
     return () => {
       if (mobileLoadTimerRef.current !== null) {
         window.clearTimeout(mobileLoadTimerRef.current);
@@ -306,18 +312,18 @@ function App() {
         </WordGrid>
 
         <Pagination>
-          <PageBtn icon onClick={() => setDesktopPage((prev) => Math.max(1, prev - 1))} disabled={desktopPage === 1}>
+          <PageBtn icon onClick={() => setDesktopPage((prev) => Math.max(1, prev - 1))} disabled={safeDesktopPage === 1}>
             <FiChevronLeft size={18} />
           </PageBtn>
           {Array.from({ length: totalDesktopPages }, (_, idx) => idx + 1).map((page) => (
-            <PageBtn key={page} active={desktopPage === page} onClick={() => setDesktopPage(page)}>
+            <PageBtn key={page} active={safeDesktopPage === page} onClick={() => setDesktopPage(page)}>
               {page}
             </PageBtn>
           ))}
           <PageBtn
             icon
             onClick={() => setDesktopPage((prev) => Math.min(totalDesktopPages, prev + 1))}
-            disabled={desktopPage === totalDesktopPages}
+            disabled={safeDesktopPage === totalDesktopPages}
           >
             <FiChevronsRight size={18} />
           </PageBtn>
