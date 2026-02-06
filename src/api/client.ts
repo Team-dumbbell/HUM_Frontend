@@ -1,4 +1,5 @@
 const rawBaseUrl = import.meta.env.VITE_BASE_URL?.trim() ?? "";
+const TOKEN_KEY = "onewave_auth_token";
 
 const normalizedBaseUrl = rawBaseUrl
   ? /^https?:\/\//i.test(rawBaseUrl)
@@ -16,11 +17,15 @@ export function buildApiUrl(path: string) {
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
+  const authToken =
+    typeof window === "undefined" ? null : window.localStorage.getItem(TOKEN_KEY);
+
   const response = await fetch(buildApiUrl(path), {
     method: "GET",
     credentials: "include",
     headers: {
       Accept: "application/json",
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
     },
   });
 
