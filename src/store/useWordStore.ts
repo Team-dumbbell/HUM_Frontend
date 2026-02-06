@@ -132,11 +132,18 @@ export const useWordStore = create<WordStore>((set, get) => ({
       ]);
 
       const profilePayload = unwrapObject(profileRes);
+      const profileDataRow = unwrapObject(profilePayload.data ?? {});
       const usersRow = unwrapObject(
-        profilePayload.users ?? profilePayload.user ?? profilePayload.user_profile,
+        profilePayload.users ??
+          profilePayload.user ??
+          profilePayload.user_profile ??
+          profileDataRow,
       );
       const settingsRow = unwrapObject(
-        profilePayload.user_vocabulary_settings ?? profilePayload.settings ?? null,
+        profileDataRow.settings ??
+          profilePayload.user_vocabulary_settings ??
+          profilePayload.settings ??
+          null,
       );
 
       const vocabularyPayload = unwrapObject(vocabularyRes);
@@ -196,7 +203,10 @@ export const useWordStore = create<WordStore>((set, get) => ({
 
       const profileWordCount = words.length;
       const profileTrackCount = tracks.length;
-      const apiName = readString(usersRow.name ?? usersRow.nickname ?? usersRow.username, "");
+      const apiName = readString(
+        usersRow.display_name ?? usersRow.name ?? usersRow.nickname ?? usersRow.username,
+        "",
+      );
       const displayName = pickDisplayName(apiName, tokenProfile);
 
       set({
