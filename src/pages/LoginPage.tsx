@@ -57,7 +57,6 @@ export default function LoginPage() {
           </LoginButton>
 
           <Divider>
-            <span>SECURE OAUTH 2.0</span>
           </Divider>
 
           <FeatureRow>
