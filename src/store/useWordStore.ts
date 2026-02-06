@@ -134,7 +134,6 @@ export const useWordStore = create<WordStore>((set, get) => ({
 
       const profilePromise = safeApiGet("/user/profile");
       const vocabularyPromise = safeApiGet("/vocabulary/lists");
-      const historyPromise = safeApiGet("/music/history");
       const wordsPromise = safeApiGet("/user/words");
 
       const profileTask = profilePromise.then((profileRes) => {
@@ -216,61 +215,20 @@ export const useWordStore = create<WordStore>((set, get) => ({
           } satisfies WordItem;
         });
 
+        const tracksFromWords = buildTracksFromWords(words);
+
         set((state) => ({
           wordList: words,
+          trackList: tracksFromWords,
           dashboard: {
             ...state.dashboard,
             totalWords: words.length,
+            totalTracks: tracksFromWords.length,
           },
           profile: {
             ...state.profile,
             totalCapturedWords: words.length,
-          },
-        }));
-      });
-
-      const historyTask = historyPromise.then((historyRes) => {
-        if (!historyRes) return;
-        hasSuccessfulResponse = true;
-
-        const historyPayload = unwrapObject(historyRes);
-        const historyRows = unwrapArray(
-          historyPayload.user_music_history ?? historyPayload.data ?? historyRes ?? [],
-        );
-
-        const tracks = historyRows.map((item, index) => {
-          const row = unwrapObject(item);
-          const platform = parsePlatform(row.platform ?? row.source_platform ?? row.channel);
-          const colors = pickCoverColors(index, platform);
-
-          return {
-            id: readNumber(row.id ?? row.history_id ?? row.track_id, index + 1),
-            title: readString(
-              row.title ?? row.song_title ?? row.track_title ?? row.song,
-              `Track ${index + 1}`,
-            ),
-            artist: readString(
-              row.artist ?? row.song_artist ?? row.track_artist,
-              "Unknown Artist",
-            ),
-            capturedAt: formatDateTimeLabel(row.created_at ?? row.captured_at ?? row.updated_at),
-            extractedWords: readNumber(row.extracted_words ?? row.word_count, 0),
-            source: readString(row.source_url ?? row.source ?? row.url, "#"),
-            platform,
-            coverStart: colors[0],
-            coverEnd: colors[1],
-          } satisfies TrackItem;
-        });
-
-        set((state) => ({
-          trackList: tracks,
-          dashboard: {
-            ...state.dashboard,
-            totalTracks: tracks.length,
-          },
-          profile: {
-            ...state.profile,
-            totalCapturedTracks: tracks.length,
+            totalCapturedTracks: tracksFromWords.length,
           },
         }));
       });
@@ -303,7 +261,7 @@ export const useWordStore = create<WordStore>((set, get) => ({
         });
       });
 
-      await Promise.allSettled([profileTask, wordsTask, historyTask, vocabularyTask]);
+      await Promise.allSettled([profileTask, wordsTask, vocabularyTask]);
 
       if (!hasSuccessfulResponse) {
         applyDummyData(set, tokenProfile);
@@ -393,7 +351,7 @@ function applyDummyData(
   tokenProfile: TokenProfile | null,
 ) {
   const words = (dummyData.words as WordItem[]) ?? [];
-  const tracks = ((dummyData as { tracks?: TrackItem[] }).tracks ?? []) as TrackItem[];
+  const tracks = buildTracksFromWords(words);
   const dashboard =
     ((dummyData as { dashboard?: DashboardData }).dashboard as DashboardData | undefined) ?? {
       greetingName: "HUM User",
@@ -503,17 +461,6 @@ function parseLanguage(value: unknown): Exclude<Language, "ALL"> {
   return "ENGLISH";
 }
 
-function parsePlatform(value: unknown): Platform {
-  const normalized = readString(value, "youtube").toLowerCase();
-  if (normalized.includes("spotify")) {
-    return "spotify";
-  }
-  if (normalized.includes("apple")) {
-    return "apple";
-  }
-  return "youtube";
-}
-
 function formatDateLabel(value: unknown) {
   if (typeof value !== "string" || !value.trim()) {
     return new Date().toISOString().slice(0, 10).replace(/-/g, ".");
@@ -598,6 +545,70 @@ function pickCoverColors(index: number, platform: Platform): [string, string] {
 
   const candidates = paletteByPlatform[platform];
   return candidates[index % candidates.length];
+}
+
+function buildTracksFromWords(words: WordItem[]) {
+  const grouped = new Map<
+    string,
+    {
+      title: string;
+      artist: string;
+      extractedWords: number;
+      latestAddedAt: string;
+    }
+  >();
+
+  for (const word of words) {
+    const title = readString(word.song, "-");
+    const artist = readString(word.artist, "-");
+    const key = `${normalizeTrackText(title)}::${normalizeTrackText(artist)}`;
+    const current = grouped.get(key);
+
+    if (!current) {
+      grouped.set(key, {
+        title,
+        artist,
+        extractedWords: 1,
+        latestAddedAt: word.addedAt,
+      });
+      continue;
+    }
+
+    current.extractedWords += 1;
+    if (word.addedAt.localeCompare(current.latestAddedAt) > 0) {
+      current.latestAddedAt = word.addedAt;
+    }
+  }
+
+  return Array.from(grouped.values()).map((entry, index) => {
+    const colors = pickCoverColors(index, "youtube");
+    const id = buildTrackId(entry.title, entry.artist);
+
+    return {
+      id,
+      title: entry.title,
+      artist: entry.artist,
+      capturedAt: entry.latestAddedAt,
+      extractedWords: entry.extractedWords,
+      source: "#",
+      platform: "youtube",
+      coverStart: colors[0],
+      coverEnd: colors[1],
+    } satisfies TrackItem;
+  });
+}
+
+function normalizeTrackText(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function buildTrackId(song: string, artist: string) {
+  const source = `${normalizeTrackText(song)}::${normalizeTrackText(artist)}`;
+  let hash = 0;
+  for (let index = 0; index < source.length; index += 1) {
+    hash = (hash * 31 + source.charCodeAt(index)) >>> 0;
+  }
+  return hash || 1;
 }
 
 function pickDisplayName(apiName: string, tokenProfile: TokenProfile | null) {

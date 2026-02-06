@@ -334,10 +334,7 @@ function wordBelongsToTrack(item: WordItem, track: TrackItem) {
   const trackTitle = track.title.trim().toLowerCase();
   const trackArtist = track.artist.trim().toLowerCase();
 
-  const isSongMatched = song === trackTitle || song.includes(trackTitle) || trackTitle.includes(song);
-  const isArtistMatched = artist === trackArtist || artist.includes(trackArtist) || trackArtist.includes(artist);
-
-  return isSongMatched && isArtistMatched;
+  return song === trackTitle && artist === trackArtist;
 }
 
 function TrackSummaryCard(props: { track: TrackItem; mobile?: boolean }) {
