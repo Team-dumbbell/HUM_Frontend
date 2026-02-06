@@ -299,10 +299,29 @@ function App() {
               </FilterGroup>
             </>
           ) : null}
-          <SortSelect>
-            <FiList size={16} />
-            <span>정렬</span>
-          </SortSelect>
+          <DesktopControls>
+            <SortSelect>
+              <FiList size={16} />
+              <span>정렬</span>
+            </SortSelect>
+            <Pagination inline>
+              <PageBtn icon onClick={() => setDesktopPage((prev) => Math.max(1, prev - 1))} disabled={safeDesktopPage === 1}>
+                <FiChevronLeft size={18} />
+              </PageBtn>
+              {Array.from({ length: totalDesktopPages }, (_, idx) => idx + 1).map((page) => (
+                <PageBtn key={page} active={safeDesktopPage === page} onClick={() => setDesktopPage(page)}>
+                  {page}
+                </PageBtn>
+              ))}
+              <PageBtn
+                icon
+                onClick={() => setDesktopPage((prev) => Math.min(totalDesktopPages, prev + 1))}
+                disabled={safeDesktopPage === totalDesktopPages}
+              >
+                <FiChevronsRight size={18} />
+              </PageBtn>
+            </Pagination>
+          </DesktopControls>
         </FilterRow>
 
         <WordGrid>
@@ -311,23 +330,6 @@ function App() {
           ))}
         </WordGrid>
 
-        <Pagination>
-          <PageBtn icon onClick={() => setDesktopPage((prev) => Math.max(1, prev - 1))} disabled={safeDesktopPage === 1}>
-            <FiChevronLeft size={18} />
-          </PageBtn>
-          {Array.from({ length: totalDesktopPages }, (_, idx) => idx + 1).map((page) => (
-            <PageBtn key={page} active={safeDesktopPage === page} onClick={() => setDesktopPage(page)}>
-              {page}
-            </PageBtn>
-          ))}
-          <PageBtn
-            icon
-            onClick={() => setDesktopPage((prev) => Math.min(totalDesktopPages, prev + 1))}
-            disabled={safeDesktopPage === totalDesktopPages}
-          >
-            <FiChevronsRight size={18} />
-          </PageBtn>
-        </Pagination>
       </Content>
       <HelpButton>?</HelpButton>
     </WebShell>
@@ -468,7 +470,6 @@ const Chip = styled.button<{ active?: boolean }>`
 `;
 
 const SortSelect = styled.button`
-  margin-left: auto;
   height: 30px;
   border-radius: 10px;
   border: 1px solid ${({ theme }) => theme.color.line};
@@ -480,6 +481,13 @@ const SortSelect = styled.button`
   align-items: center;
   gap: 8px;
   cursor: pointer;
+`;
+
+const DesktopControls = styled.div`
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 `;
 
 const SelectedTrackCard = styled.article<{ mobile?: boolean }>`
@@ -625,8 +633,8 @@ const Meta = styled.div`
   }
 `;
 
-const Pagination = styled.div<{ mobile?: boolean }>`
-  margin: ${({ mobile }) => (mobile ? "24px 0 112px" : "14px 0 0")};
+const Pagination = styled.div<{ mobile?: boolean; inline?: boolean }>`
+  margin: ${({ mobile, inline }) => (inline ? "0" : mobile ? "24px 0 112px" : "14px 0 0")};
   display: flex;
   justify-content: center;
   gap: 10px;
