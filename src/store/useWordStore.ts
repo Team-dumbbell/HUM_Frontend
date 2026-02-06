@@ -81,17 +81,19 @@ type WordStore = {
   getDashboardRecentTracks: (count?: number) => TrackItem[];
 };
 
+let appDataRequest: Promise<void> | null = null;
+
 export const useWordStore = create<WordStore>((set, get) => ({
   wordList: [],
   trackList: [],
   dashboard: {
-    greetingName: "홍길동",
+    greetingName: "HUM User",
     totalWords: 0,
     totalTracks: 0,
   },
   user: {
-    name: "홍길동",
-    avatarText: "홍",
+    name: "HUM User",
+    avatarText: "H",
   },
   profile: {
     email: "",
@@ -121,15 +123,25 @@ export const useWordStore = create<WordStore>((set, get) => ({
     })),
 
   fetchAppData: async () => {
-    const tokenProfile = readProfileFromStoredToken();
+    if (appDataRequest) {
+      await appDataRequest;
+      return;
+    }
 
-    try {
-      const [profileRes, vocabularyRes, historyRes, wordsRes] = await Promise.all([
-        apiGet<unknown>("/user/profile"),
-        apiGet<unknown>("/vocabulary/lists"),
-        apiGet<unknown>("/music/history"),
-        apiGet<unknown>("/user/words"),
-      ]);
+    appDataRequest = (async () => {
+    const tokenProfile = readProfileFromStoredToken();
+    const currentState = get();
+    const [profileRes, vocabularyRes, historyRes, wordsRes] = await Promise.all([
+      safeApiGet("/user/profile"),
+      safeApiGet("/vocabulary/lists"),
+      safeApiGet("/music/history"),
+      safeApiGet("/user/words"),
+    ]);
+
+    if (!profileRes && !vocabularyRes && !historyRes && !wordsRes) {
+      applyDummyData(set, tokenProfile);
+      return;
+    }
 
       const profilePayload = unwrapObject(profileRes);
       const profileDataRow = unwrapObject(profilePayload.data ?? {});
@@ -148,20 +160,20 @@ export const useWordStore = create<WordStore>((set, get) => ({
 
       const vocabularyPayload = unwrapObject(vocabularyRes);
       const vocabularyLists = unwrapArray(
-        vocabularyPayload.vocabulary_lists ?? vocabularyPayload.data ?? vocabularyRes,
+        vocabularyPayload.vocabulary_lists ?? vocabularyPayload.data ?? vocabularyRes ?? [],
       );
 
       const historyPayload = unwrapObject(historyRes);
       const historyRows = unwrapArray(
-        historyPayload.user_music_history ?? historyPayload.data ?? historyRes,
+        historyPayload.user_music_history ?? historyPayload.data ?? historyRes ?? [],
       );
 
       const wordsPayload = unwrapObject(wordsRes);
-      const userWordsRows = unwrapArray(wordsPayload.user_words ?? wordsPayload.data ?? wordsRes);
+      const userWordsRows = unwrapArray(wordsPayload.user_words ?? wordsPayload.data ?? wordsRes ?? []);
       const synonymRows = unwrapArray(wordsPayload.word_synonyms ?? []);
       const synonymsByWord = buildSynonymMap(synonymRows);
 
-      const words = userWordsRows.map((item, index) => {
+      const words = wordsRes ? userWordsRows.map((item, index) => {
         const row = unwrapObject(item);
         const word = readString(row.word ?? row.term ?? row.text, `word-${index + 1}`);
         const mappedSynonyms =
@@ -181,9 +193,9 @@ export const useWordStore = create<WordStore>((set, get) => ({
           language: parseLanguage(row.language ?? row.lang),
           synonyms: mappedSynonyms,
         } satisfies WordItem;
-      });
+      }) : currentState.wordList;
 
-      const tracks = historyRows.map((item, index) => {
+      const tracks = historyRes ? historyRows.map((item, index) => {
         const row = unwrapObject(item);
         const platform = parsePlatform(row.platform ?? row.source_platform ?? row.channel);
         const colors = pickCoverColors(index, platform);
@@ -199,7 +211,7 @@ export const useWordStore = create<WordStore>((set, get) => ({
           coverStart: colors[0],
           coverEnd: colors[1],
         } satisfies TrackItem;
-      });
+      }) : currentState.trackList;
 
       const profileWordCount = words.length;
       const profileTrackCount = tracks.length;
@@ -227,12 +239,14 @@ export const useWordStore = create<WordStore>((set, get) => ({
           streakDays: readNumber(settingsRow.streak_days ?? settingsRow.streakDays, 0),
           favoriteLanguage: readString(settingsRow.favorite_language ?? settingsRow.language, "ENGLISH"),
           totalCapturedWords: profileWordCount || countEntriesFromVocabularyLists(vocabularyLists),
-          totalCapturedTracks: profileTrackCount,
-        },
-      });
-    } catch {
-      applyDummyData(set, tokenProfile);
-    }
+        totalCapturedTracks: profileTrackCount,
+      },
+    });
+    })().finally(() => {
+      appDataRequest = null;
+    });
+
+    await appDataRequest;
   },
 
   getFilteredWords: () => {
@@ -317,14 +331,14 @@ function applyDummyData(
   const tracks = ((dummyData as { tracks?: TrackItem[] }).tracks ?? []) as TrackItem[];
   const dashboard =
     ((dummyData as { dashboard?: DashboardData }).dashboard as DashboardData | undefined) ?? {
-      greetingName: "홍길동",
+      greetingName: "HUM User",
       totalWords: words.length,
       totalTracks: tracks.length,
     };
   const user =
     ((dummyData as { user?: UserData }).user as UserData | undefined) ?? {
-      name: "홍길동",
-      avatarText: "홍",
+      name: "HUM User",
+      avatarText: "H",
     };
   const profile =
     ((dummyData as { profile?: ProfileData }).profile as ProfileData | undefined) ?? {
@@ -372,6 +386,14 @@ function unwrapObject(value: unknown) {
 
 function unwrapArray(value: unknown) {
   return Array.isArray(value) ? value : [];
+}
+
+async function safeApiGet(path: string) {
+  try {
+    return await apiGet<unknown>(path);
+  } catch {
+    return null;
+  }
 }
 
 function readString(value: unknown, fallback: string) {
