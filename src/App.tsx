@@ -299,25 +299,6 @@ function App() {
               </FilterGroup>
             </>
           ) : null}
-          <CenterPagination>
-            <Pagination inline>
-              <PageBtn icon onClick={() => setDesktopPage((prev) => Math.max(1, prev - 1))} disabled={safeDesktopPage === 1}>
-                <FiChevronLeft size={18} />
-              </PageBtn>
-              {Array.from({ length: totalDesktopPages }, (_, idx) => idx + 1).map((page) => (
-                <PageBtn key={page} active={safeDesktopPage === page} onClick={() => setDesktopPage(page)}>
-                  {page}
-                </PageBtn>
-              ))}
-              <PageBtn
-                icon
-                onClick={() => setDesktopPage((prev) => Math.min(totalDesktopPages, prev + 1))}
-                disabled={safeDesktopPage === totalDesktopPages}
-              >
-                <FiChevronsRight size={18} />
-              </PageBtn>
-            </Pagination>
-          </CenterPagination>
           <SortSelect>
             <FiList size={16} />
             <span>정렬</span>
@@ -330,6 +311,23 @@ function App() {
           ))}
         </WordGrid>
 
+        <Pagination>
+          <PageBtn icon onClick={() => setDesktopPage((prev) => Math.max(1, prev - 1))} disabled={safeDesktopPage === 1}>
+            <FiChevronLeft size={18} />
+          </PageBtn>
+          {Array.from({ length: totalDesktopPages }, (_, idx) => idx + 1).map((page) => (
+            <PageBtn key={page} active={safeDesktopPage === page} onClick={() => setDesktopPage(page)}>
+              {page}
+            </PageBtn>
+          ))}
+          <PageBtn
+            icon
+            onClick={() => setDesktopPage((prev) => Math.min(totalDesktopPages, prev + 1))}
+            disabled={safeDesktopPage === totalDesktopPages}
+          >
+            <FiChevronsRight size={18} />
+          </PageBtn>
+        </Pagination>
       </Content>
       <HelpButton>?</HelpButton>
     </WebShell>
@@ -484,13 +482,6 @@ const SortSelect = styled.button`
   align-items: center;
   gap: 8px;
   cursor: pointer;
-`;
-
-const CenterPagination = styled.div`
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
 `;
 
 const SelectedTrackCard = styled.article<{ mobile?: boolean }>`
