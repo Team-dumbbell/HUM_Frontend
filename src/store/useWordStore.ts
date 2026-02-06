@@ -1,4 +1,4 @@
-import { create } from "zustand";
+﻿import { create } from "zustand";
 import { apiGet } from "../api/client";
 import { readProfileFromStoredToken, type TokenProfile } from "../auth/tokenProfile";
 import dummyData from "../data/dummy.json";
@@ -129,126 +129,182 @@ export const useWordStore = create<WordStore>((set, get) => ({
     }
 
     appDataRequest = (async () => {
-    const tokenProfile = readProfileFromStoredToken();
-    const currentState = get();
-    const [profileRes, vocabularyRes, historyRes, wordsRes] = await Promise.all([
-      safeApiGet("/user/profile"),
-      safeApiGet("/vocabulary/lists"),
-      safeApiGet("/music/history"),
-      safeApiGet("/user/words"),
-    ]);
+      const tokenProfile = readProfileFromStoredToken();
+      let hasSuccessfulResponse = false;
 
-    if (!profileRes && !vocabularyRes && !historyRes && !wordsRes) {
-      applyDummyData(set, tokenProfile);
-      return;
-    }
+      const profilePromise = safeApiGet("/user/profile");
+      const vocabularyPromise = safeApiGet("/vocabulary/lists");
+      const historyPromise = safeApiGet("/music/history");
+      const wordsPromise = safeApiGet("/user/words");
 
-      const profilePayload = unwrapObject(profileRes);
-      const profileDataRow = unwrapObject(profilePayload.data ?? {});
-      const usersRow = unwrapObject(
-        profilePayload.users ??
-          profilePayload.user ??
-          profilePayload.user_profile ??
-          profileDataRow,
-      );
-      const settingsRow = unwrapObject(
-        profileDataRow.settings ??
-          profilePayload.user_vocabulary_settings ??
-          profilePayload.settings ??
-          null,
-      );
+      const profileTask = profilePromise.then((profileRes) => {
+        if (!profileRes) return;
+        hasSuccessfulResponse = true;
 
-      const vocabularyPayload = unwrapObject(vocabularyRes);
-      const vocabularyLists = unwrapArray(
-        vocabularyPayload.vocabulary_lists ?? vocabularyPayload.data ?? vocabularyRes ?? [],
-      );
+        const profilePayload = unwrapObject(profileRes);
+        const profileDataRow = unwrapObject(profilePayload.data ?? {});
+        const usersRow = unwrapObject(
+          profilePayload.users ??
+            profilePayload.user ??
+            profilePayload.user_profile ??
+            profileDataRow,
+        );
+        const settingsRow = unwrapObject(
+          profileDataRow.settings ??
+            profilePayload.user_vocabulary_settings ??
+            profilePayload.settings ??
+            null,
+        );
 
-      const historyPayload = unwrapObject(historyRes);
-      const historyRows = unwrapArray(
-        historyPayload.user_music_history ?? historyPayload.data ?? historyRes ?? [],
-      );
+        const apiName = readString(
+          usersRow.display_name ?? usersRow.name ?? usersRow.nickname ?? usersRow.username,
+          "",
+        );
+        const displayName = pickDisplayName(apiName, tokenProfile);
 
-      const wordsPayload = unwrapObject(wordsRes);
-      const userWordsRows = unwrapArray(wordsPayload.user_words ?? wordsPayload.data ?? wordsRes ?? []);
-      const synonymRows = unwrapArray(wordsPayload.word_synonyms ?? []);
-      const synonymsByWord = buildSynonymMap(synonymRows);
+        set((state) => ({
+          dashboard: {
+            ...state.dashboard,
+            greetingName: displayName,
+          },
+          user: {
+            ...state.user,
+            name: displayName,
+            avatarText: displayName.charAt(0).toUpperCase() || tokenProfile?.avatarText || "H",
+          },
+          profile: {
+            ...state.profile,
+            email: readString(usersRow.email, tokenProfile?.email || ""),
+            level: readString(settingsRow.level, "Beginner"),
+            streakDays: readNumber(settingsRow.streak_days ?? settingsRow.streakDays, 0),
+            favoriteLanguage: readString(settingsRow.favorite_language ?? settingsRow.language, "ENGLISH"),
+          },
+        }));
+      });
 
-      const words = wordsRes ? userWordsRows.map((item, index) => {
-        const row = unwrapObject(item);
-        const word = readString(row.word ?? row.term ?? row.text, `word-${index + 1}`);
-        const mappedSynonyms =
-          readStringArray(row.synonyms) ??
-          synonymsByWord.get(String(row.id ?? row.word_id ?? word)) ??
-          [];
+      const wordsTask = wordsPromise.then((wordsRes) => {
+        if (!wordsRes) return;
+        hasSuccessfulResponse = true;
 
-        return {
-          id: readNumber(row.id ?? row.word_id, index + 1),
-          word,
-          meaning: readString(row.meaning ?? row.definition ?? row.translation, "-"),
-          partOfSpeech: readString(row.part_of_speech ?? row.partOfSpeech ?? row.pos, "기타"),
-          artist: readString(row.artist ?? row.song_artist, "-"),
-          song: readString(row.song ?? row.track_title ?? row.music_title, "-"),
-          frequency: readNumber(row.frequency ?? row.count ?? row.capture_count, 1),
-          addedAt: formatDateLabel(row.created_at ?? row.added_at ?? row.updated_at),
-          language: parseLanguage(row.language ?? row.lang),
-          synonyms: mappedSynonyms,
-        } satisfies WordItem;
-      }) : currentState.wordList;
+        const wordsPayload = unwrapObject(wordsRes);
+        const userWordsRows = unwrapArray(wordsPayload.user_words ?? wordsPayload.data ?? wordsRes ?? []);
+        const synonymRows = unwrapArray(wordsPayload.word_synonyms ?? []);
+        const synonymsByWord = buildSynonymMap(synonymRows);
 
-      const tracks = historyRes ? historyRows.map((item, index) => {
-        const row = unwrapObject(item);
-        const platform = parsePlatform(row.platform ?? row.source_platform ?? row.channel);
-        const colors = pickCoverColors(index, platform);
+        const words = userWordsRows.map((item, index) => {
+          const row = unwrapObject(item);
+          const word = readString(row.word ?? row.term ?? row.text, `word-${index + 1}`);
+          const mappedSynonyms =
+            readStringArray(row.synonyms) ??
+            synonymsByWord.get(String(row.id ?? row.word_id ?? word)) ??
+            [];
 
-        return {
-          id: readNumber(row.id ?? row.history_id ?? row.track_id, index + 1),
-          title: readString(row.title ?? row.track_title ?? row.song, `Track ${index + 1}`),
-          artist: readString(row.artist ?? row.track_artist, "Unknown Artist"),
-          capturedAt: formatDateTimeLabel(row.created_at ?? row.captured_at ?? row.updated_at),
-          extractedWords: readNumber(row.extracted_words ?? row.word_count, 0),
-          source: readString(row.source_url ?? row.source ?? row.url, "#"),
-          platform,
-          coverStart: colors[0],
-          coverEnd: colors[1],
-        } satisfies TrackItem;
-      }) : currentState.trackList;
+          return {
+            id: readNumber(row.id ?? row.word_id, index + 1),
+            word,
+            meaning: readString(row.meaning ?? row.definition ?? row.translation, "-"),
+            partOfSpeech: readString(row.part_of_speech ?? row.partOfSpeech ?? row.pos, "기타"),
+            artist: readString(row.artist ?? row.song_artist, "-"),
+            song: readString(row.song ?? row.track_title ?? row.music_title, "-"),
+            frequency: readNumber(row.frequency ?? row.count ?? row.capture_count, 1),
+            addedAt: formatDateLabel(row.created_at ?? row.added_at ?? row.updated_at),
+            language: parseLanguage(row.language ?? row.lang),
+            synonyms: mappedSynonyms,
+          } satisfies WordItem;
+        });
 
-      const profileWordCount = words.length;
-      const profileTrackCount = tracks.length;
-      const apiName = readString(
-        usersRow.display_name ?? usersRow.name ?? usersRow.nickname ?? usersRow.username,
-        "",
-      );
-      const displayName = pickDisplayName(apiName, tokenProfile);
+        set((state) => ({
+          wordList: words,
+          dashboard: {
+            ...state.dashboard,
+            totalWords: words.length,
+          },
+          profile: {
+            ...state.profile,
+            totalCapturedWords: words.length,
+          },
+        }));
+      });
 
-      set({
-        wordList: words,
-        trackList: tracks,
-        dashboard: {
-          greetingName: displayName,
-          totalWords: profileWordCount || countEntriesFromVocabularyLists(vocabularyLists),
-          totalTracks: profileTrackCount,
-        },
-        user: {
-          name: displayName,
-          avatarText: displayName.charAt(0).toUpperCase() || tokenProfile?.avatarText || "H",
-        },
-        profile: {
-          email: readString(usersRow.email, tokenProfile?.email || ""),
-          level: readString(settingsRow.level, "Beginner"),
-          streakDays: readNumber(settingsRow.streak_days ?? settingsRow.streakDays, 0),
-          favoriteLanguage: readString(settingsRow.favorite_language ?? settingsRow.language, "ENGLISH"),
-          totalCapturedWords: profileWordCount || countEntriesFromVocabularyLists(vocabularyLists),
-        totalCapturedTracks: profileTrackCount,
-      },
-    });
+      const historyTask = historyPromise.then((historyRes) => {
+        if (!historyRes) return;
+        hasSuccessfulResponse = true;
+
+        const historyPayload = unwrapObject(historyRes);
+        const historyRows = unwrapArray(
+          historyPayload.user_music_history ?? historyPayload.data ?? historyRes ?? [],
+        );
+
+        const tracks = historyRows.map((item, index) => {
+          const row = unwrapObject(item);
+          const platform = parsePlatform(row.platform ?? row.source_platform ?? row.channel);
+          const colors = pickCoverColors(index, platform);
+
+          return {
+            id: readNumber(row.id ?? row.history_id ?? row.track_id, index + 1),
+            title: readString(row.title ?? row.track_title ?? row.song, `Track ${index + 1}`),
+            artist: readString(row.artist ?? row.track_artist, "Unknown Artist"),
+            capturedAt: formatDateTimeLabel(row.created_at ?? row.captured_at ?? row.updated_at),
+            extractedWords: readNumber(row.extracted_words ?? row.word_count, 0),
+            source: readString(row.source_url ?? row.source ?? row.url, "#"),
+            platform,
+            coverStart: colors[0],
+            coverEnd: colors[1],
+          } satisfies TrackItem;
+        });
+
+        set((state) => ({
+          trackList: tracks,
+          dashboard: {
+            ...state.dashboard,
+            totalTracks: tracks.length,
+          },
+          profile: {
+            ...state.profile,
+            totalCapturedTracks: tracks.length,
+          },
+        }));
+      });
+
+      const vocabularyTask = vocabularyPromise.then((vocabularyRes) => {
+        if (!vocabularyRes) return;
+        hasSuccessfulResponse = true;
+
+        const vocabularyPayload = unwrapObject(vocabularyRes);
+        const vocabularyLists = unwrapArray(
+          vocabularyPayload.vocabulary_lists ?? vocabularyPayload.data ?? vocabularyRes ?? [],
+        );
+        const fallbackWordCount = countEntriesFromVocabularyLists(vocabularyLists);
+        if (fallbackWordCount <= 0) return;
+
+        set((state) => {
+          if (state.wordList.length > 0) {
+            return {};
+          }
+          return {
+            dashboard: {
+              ...state.dashboard,
+              totalWords: fallbackWordCount,
+            },
+            profile: {
+              ...state.profile,
+              totalCapturedWords: fallbackWordCount,
+            },
+          };
+        });
+      });
+
+      await Promise.allSettled([profileTask, wordsTask, historyTask, vocabularyTask]);
+
+      if (!hasSuccessfulResponse) {
+        applyDummyData(set, tokenProfile);
+      }
     })().finally(() => {
       appDataRequest = null;
     });
 
     await appDataRequest;
   },
-
   getFilteredWords: () => {
     const { wordList, query, sortType, language } = get();
 
@@ -579,3 +635,4 @@ function isPlaceholderEmail(value: string) {
   }
   return email.endsWith("@example.com");
 }
+
