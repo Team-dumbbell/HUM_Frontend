@@ -32,7 +32,7 @@ export default function LoginPage() {
             <BrandMark>
               <FiMusic size={15} />
             </BrandMark>
-            <BrandName>Vinsign Music</BrandName>
+            <BrandName>HUM</BrandName>
           </Brand>
 
           <HeroTitle>

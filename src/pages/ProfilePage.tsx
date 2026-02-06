@@ -150,7 +150,7 @@ export default function ProfilePage() {
           <SettingSectionList />
 
           <FooterText>
-            <span>Vinsign Music Learner v2.4.0</span>
+            <span>HUM Learner v2.4.0</span>
             <FooterLinks>
               <button type="button">이용약관</button>
               <button type="button">개인정보처리방침</button>
@@ -201,7 +201,7 @@ export default function ProfilePage() {
           <SettingSectionList />
 
           <FooterText desktop>
-            <span>Vinsign Music Learner v2.4.0</span>
+            <span>HUM Learner v2.4.0</span>
             <FooterLinks>
               <button type="button">이용약관</button>
               <button type="button">개인정보처리방침</button>
