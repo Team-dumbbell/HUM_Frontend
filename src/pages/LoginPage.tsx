@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import { FiMusic, FiShield, FiZap } from "react-icons/fi";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 type LocationState = {
@@ -8,18 +8,16 @@ type LocationState = {
 };
 
 export default function LoginPage() {
-  const navigate = useNavigate();
   const location = useLocation();
-  const { loginBypass, isLoggedIn } = useAuth();
+  const { loginWithGoogle, isLoggedIn } = useAuth();
   const target = (location.state as LocationState | null)?.from || "/dashboard";
 
   if (isLoggedIn) {
     return <Navigate to={target} replace />;
   }
 
-  const handleBypassLogin = () => {
-    loginBypass();
-    navigate(target, { replace: true });
+  const handleGoogleLogin = () => {
+    loginWithGoogle();
   };
 
   return (
@@ -53,7 +51,7 @@ export default function LoginPage() {
           <Heading>반가워요!</Heading>
           <SubHeading>서비스 이용을 위해 로그인이 필요합니다.</SubHeading>
 
-          <LoginButton type="button" onClick={handleBypassLogin}>
+          <LoginButton type="button" onClick={handleGoogleLogin}>
             <GoogleMark>G</GoogleMark>
             구글 계정으로 시작하기
           </LoginButton>

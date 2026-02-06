@@ -1,9 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { isAuthenticated, signInBypass, signOut } from "./auth";
+import { checkAuthSession, clearAuthenticated, isAuthenticated, redirectToGoogleLogin } from "./auth";
 
 type AuthContextValue = {
   isLoggedIn: boolean;
-  loginBypass: () => void;
+  isChecking: boolean;
+  loginWithGoogle: () => void;
+  refreshSession: () => Promise<void>;
   logout: () => void;
 };
 
@@ -11,16 +13,27 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(() => isAuthenticated());
+  const [isChecking, setIsChecking] = useState(true);
 
-  const loginBypass = useCallback(() => {
-    signInBypass();
-    setIsLoggedIn(true);
+  const loginWithGoogle = useCallback(() => {
+    redirectToGoogleLogin();
   }, []);
 
   const logout = useCallback(() => {
-    signOut();
+    clearAuthenticated();
     setIsLoggedIn(false);
   }, []);
+
+  const refreshSession = useCallback(async () => {
+    setIsChecking(true);
+    const authenticated = await checkAuthSession();
+    setIsLoggedIn(authenticated);
+    setIsChecking(false);
+  }, []);
+
+  useEffect(() => {
+    void refreshSession();
+  }, [refreshSession]);
 
   useEffect(() => {
     const handleStorage = () => {
@@ -34,10 +47,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       isLoggedIn,
-      loginBypass,
+      isChecking,
+      loginWithGoogle,
+      refreshSession,
       logout,
     }),
-    [isLoggedIn, loginBypass, logout],
+    [isLoggedIn, isChecking, loginWithGoogle, refreshSession, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

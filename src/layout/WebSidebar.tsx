@@ -3,6 +3,7 @@ import type { ComponentType } from "react";
 import { FaItunesNote } from "react-icons/fa";
 import { FiBookOpen, FiHome, FiMusic, FiUser } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 
 type Menu = {
   id: "dashboard" | "vocab" | "track";
@@ -20,11 +21,17 @@ const menus: Menu[] = [
 export default function WebSidebar() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { logout } = useAuth();
 
   const isActive = (id: Menu["id"]) => {
     if (id === "track") return pathname.startsWith("/tracks");
     if (id === "vocab") return pathname.startsWith("/words");
     return pathname.startsWith("/dashboard");
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -58,7 +65,9 @@ export default function WebSidebar() {
           <FiUser size={18} />
           <span>마이페이지</span>
         </FooterItem>
-        <Logout type="button">로그아웃</Logout>
+        <Logout type="button" onClick={handleLogout}>
+          로그아웃
+        </Logout>
       </Footer>
     </Wrap>
   );

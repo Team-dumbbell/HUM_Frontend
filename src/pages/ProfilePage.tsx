@@ -1,6 +1,7 @@
 import { useEffect, type ComponentType } from "react";
 import styled from "@emotion/styled";
 import { FaGoogle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import {
   FiBell,
   FiCamera,
@@ -13,6 +14,7 @@ import {
 } from "react-icons/fi";
 import MobileBottomNav from "../layout/MobileBottomNav";
 import WebSidebar from "../layout/WebSidebar";
+import { useAuth } from "../auth/AuthContext";
 import { useMediaQuery } from "../shared/hooks/useMediaQueryl";
 import { useWordStore } from "../store/useWordStore";
 
@@ -95,6 +97,8 @@ const SETTING_SECTIONS: SettingSection[] = [
 
 export default function ProfilePage() {
   const isMobile = useMediaQuery("(max-width: 1023px)");
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const { user, profile, fetchAppData } = useWordStore();
 
   useEffect(() => {
@@ -104,6 +108,11 @@ export default function ProfilePage() {
   const displayName = user.name && !user.name.includes("?") ? user.name : "김지훈";
   const displayEmail = profile.email && profile.email.includes("@") ? profile.email : "jihon.kim@gmail.com";
   const avatarText = user.avatarText && !user.avatarText.includes("?") ? user.avatarText : displayName[0] ?? "김";
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
 
   if (isMobile) {
     return (
@@ -130,7 +139,9 @@ export default function ProfilePage() {
                 </EmailRow>
                 <ButtonRow>
                   <EditButton type="button">프로필 수정</EditButton>
-                  <LogoutButton type="button">로그아웃</LogoutButton>
+                  <LogoutButton type="button" onClick={handleLogout}>
+                    로그아웃
+                  </LogoutButton>
                 </ButtonRow>
               </ProfileText>
             </ProfileMain>
@@ -179,7 +190,9 @@ export default function ProfilePage() {
                 </EmailRow>
                 <ButtonRow>
                   <EditButton type="button">프로필 수정</EditButton>
-                  <LogoutButton type="button">로그아웃</LogoutButton>
+                  <LogoutButton type="button" onClick={handleLogout}>
+                    로그아웃
+                  </LogoutButton>
                 </ButtonRow>
               </ProfileText>
             </ProfileMain>

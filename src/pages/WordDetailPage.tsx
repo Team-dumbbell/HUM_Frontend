@@ -108,9 +108,13 @@ export default function WordDetailPage() {
     unstoppable: ["invincible", "relentless", "untiring"],
   };
 
-  const synonyms: SynonymExample[] = (
-    synonymMap[word.word.toLowerCase()] ?? ["similar", "related", "equivalent"]
-  ).map((item, idx) => ({
+  const apiSynonyms = Array.isArray(word.synonyms) ? word.synonyms : [];
+  const baseSynonyms =
+    apiSynonyms.length > 0
+      ? apiSynonyms
+      : (synonymMap[word.word.toLowerCase()] ?? ["similar", "related", "equivalent"]);
+
+  const synonyms: SynonymExample[] = baseSynonyms.map((item, idx) => ({
     id: idx + 1,
     word: item,
     meaning: `${word.meaning}와(과) 유사한 뉘앙스`,
