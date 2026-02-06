@@ -350,8 +350,7 @@ function TrackSummaryCard(props: { track: TrackItem; mobile?: boolean }) {
           {track.title.slice(0, 2).toUpperCase()}
         </SelectedCover>
         <SelectedMeta>
-          <SelectedTitle>{track.title}</SelectedTitle>
-          <SelectedArtist>{track.artist}</SelectedArtist>
+          <SelectedTitle>{track.title} - {track.artist}</SelectedTitle>
           <SelectedInfo>
             <span>캡처 {track.capturedAt}</span>
             <b>단어 {track.extractedWords}개</b>
@@ -376,7 +375,7 @@ function WordCard(props: { item: WordItem; mobile?: boolean; onClick?: () => voi
       <TrackRow>
         <FiMusic size={16} />
         <span>
-          {item.artist} - {item.song}
+          {item.song} - {item.artist}
         </span>
       </TrackRow>
 
@@ -511,21 +510,11 @@ const SelectedMeta = styled.div`
 `;
 
 const SelectedTitle = styled.h2`
-  margin: 0;
+  margin: 0 0 8px;
   font-size: 32px;
 
   @media (max-width: 1023px) {
     font-size: 22px;
-  }
-`;
-
-const SelectedArtist = styled.p`
-  margin: 3px 0 8px;
-  color: #75819a;
-  font-size: 18px;
-
-  @media (max-width: 1023px) {
-    font-size: 14px;
   }
 `;
 

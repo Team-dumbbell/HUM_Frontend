@@ -40,7 +40,7 @@ export default function WebSidebar() {
         <Logo>
           <FaItunesNote />
         </Logo>
-        <Brand>Vinsign Vocab</Brand>
+        <Brand>HUM</Brand>
       </Header>
 
       <Nav>

@@ -163,10 +163,9 @@ export default function TrackListPage() {
               </Cover>
               <MetaBlock>
                 <CardTop>
-                  <Name>{track.title}</Name>
+                  <Name>{track.title} - {track.artist}</Name>
                   <PlatformBadge platform={track.platform}>{platformLabel(track.platform)}</PlatformBadge>
                 </CardTop>
-                <Artist>{track.artist}</Artist>
                 <TrackMeta>
                   <span>캡처 {track.capturedAt}</span>
                   <b>단어 {track.extractedWords}개</b>
@@ -239,7 +238,7 @@ export default function TrackListPage() {
                 </Cover>
                 <MetaBlock>
                   <CardTop>
-                    <Name>{track.title}</Name>
+                    <Name>{track.title} - {track.artist}</Name>
                     <WebPlatformBadge platform={track.platform} multiline={track.platform === "apple"}>
                       {track.platform === "apple" ? (
                         <>
@@ -251,7 +250,6 @@ export default function TrackListPage() {
                       )}
                     </WebPlatformBadge>
                   </CardTop>
-                  <Artist>{track.artist}</Artist>
                   <TrackMeta>
                     <span>캡처 {track.capturedAt}</span>
                     <b>단어 {track.extractedWords}개</b>
@@ -436,12 +434,6 @@ const CardTop = styled.div`
 const Name = styled.h2`
   margin: 0;
   font-size: 20px;
-`;
-
-const Artist = styled.p`
-  margin: 4px 0 8px;
-  color: #75819a;
-  font-size: 14px;
 `;
 
 const PlatformBadge = styled.span<{ platform: Platform }>`

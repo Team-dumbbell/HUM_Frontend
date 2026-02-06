@@ -18,7 +18,7 @@ export default function MobileShell(props: {
         <BrandRow>
           <Brand>
             <Logo><FaItunesNote /></Logo>
-            <BrandName>Vinsign</BrandName>
+            <BrandName>HUM</BrandName>
           </Brand>
           <Avatar>?</Avatar>
         </BrandRow>

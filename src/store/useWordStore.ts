@@ -205,7 +205,10 @@ export const useWordStore = create<WordStore>((set, get) => ({
             meaning: readString(row.meaning ?? row.definition ?? row.translation, "-"),
             partOfSpeech: readString(row.part_of_speech ?? row.partOfSpeech ?? row.pos, "기타"),
             artist: readString(row.artist ?? row.song_artist, "-"),
-            song: readString(row.song ?? row.track_title ?? row.music_title, "-"),
+            song: readString(
+              row.song ?? row.song_title ?? row.track_title ?? row.music_title,
+              "-",
+            ),
             frequency: readNumber(row.frequency ?? row.count ?? row.capture_count, 1),
             addedAt: formatDateLabel(row.created_at ?? row.added_at ?? row.updated_at),
             language: parseLanguage(row.language ?? row.lang),
@@ -242,8 +245,14 @@ export const useWordStore = create<WordStore>((set, get) => ({
 
           return {
             id: readNumber(row.id ?? row.history_id ?? row.track_id, index + 1),
-            title: readString(row.title ?? row.track_title ?? row.song, `Track ${index + 1}`),
-            artist: readString(row.artist ?? row.track_artist, "Unknown Artist"),
+            title: readString(
+              row.title ?? row.song_title ?? row.track_title ?? row.song,
+              `Track ${index + 1}`,
+            ),
+            artist: readString(
+              row.artist ?? row.song_artist ?? row.track_artist,
+              "Unknown Artist",
+            ),
             capturedAt: formatDateTimeLabel(row.created_at ?? row.captured_at ?? row.updated_at),
             extractedWords: readNumber(row.extracted_words ?? row.word_count, 0),
             source: readString(row.source_url ?? row.source ?? row.url, "#"),
