@@ -335,9 +335,10 @@ function applyDummyData(
       totalCapturedWords: words.length,
       totalCapturedTracks: tracks.length,
     };
-  const mergedName = tokenProfile?.name || user.name || dashboard.greetingName || "HUM User";
+  const dummyName = pickDisplayName(user.name || dashboard.greetingName || "", tokenProfile);
+  const mergedName = dummyName || tokenProfile?.name || "HUM User";
   const mergedAvatar = tokenProfile?.avatarText || mergedName.charAt(0).toUpperCase() || "H";
-  const mergedEmail = tokenProfile?.email || profile.email || "";
+  const mergedEmail = isPlaceholderEmail(profile.email) ? tokenProfile?.email || "" : profile.email || tokenProfile?.email || "";
 
   set({
     wordList: words,
@@ -547,4 +548,12 @@ function isLikelyInternalIdentifier(value: string) {
   const hasLetters = /[a-zA-Z]/.test(compact);
   const hasNumbers = /\d/.test(compact);
   return compact.length >= 16 && hasLetters && hasNumbers;
+}
+
+function isPlaceholderEmail(value: string) {
+  const email = value.trim().toLowerCase();
+  if (!email) {
+    return true;
+  }
+  return email.endsWith("@example.com");
 }
