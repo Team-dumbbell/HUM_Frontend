@@ -299,11 +299,7 @@ function App() {
               </FilterGroup>
             </>
           ) : null}
-          <DesktopControls>
-            <SortSelect>
-              <FiList size={16} />
-              <span>정렬</span>
-            </SortSelect>
+          <CenterPagination>
             <Pagination inline>
               <PageBtn icon onClick={() => setDesktopPage((prev) => Math.max(1, prev - 1))} disabled={safeDesktopPage === 1}>
                 <FiChevronLeft size={18} />
@@ -321,7 +317,11 @@ function App() {
                 <FiChevronsRight size={18} />
               </PageBtn>
             </Pagination>
-          </DesktopControls>
+          </CenterPagination>
+          <SortSelect>
+            <FiList size={16} />
+            <span>정렬</span>
+          </SortSelect>
         </FilterRow>
 
         <WordGrid>
@@ -429,10 +429,12 @@ const Subtitle = styled.p`
 `;
 
 const FilterRow = styled.div`
+  position: relative;
   display: flex;
   align-items: flex-end;
   gap: 12px;
   margin-bottom: 12px;
+  min-height: 40px;
 `;
 
 const FilterGroup = styled.div`
@@ -470,6 +472,7 @@ const Chip = styled.button<{ active?: boolean }>`
 `;
 
 const SortSelect = styled.button`
+  margin-left: auto;
   height: 30px;
   border-radius: 10px;
   border: 1px solid ${({ theme }) => theme.color.line};
@@ -483,11 +486,11 @@ const SortSelect = styled.button`
   cursor: pointer;
 `;
 
-const DesktopControls = styled.div`
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
+const CenterPagination = styled.div`
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 `;
 
 const SelectedTrackCard = styled.article<{ mobile?: boolean }>`
