@@ -94,7 +94,7 @@ export const useWordStore = create<WordStore>((set, get) => ({
     avatarText: "홍",
   },
   profile: {
-    email: "user@example.com",
+    email: "",
     level: "Beginner",
     streakDays: 0,
     favoriteLanguage: "ENGLISH",
@@ -196,10 +196,8 @@ export const useWordStore = create<WordStore>((set, get) => ({
 
       const profileWordCount = words.length;
       const profileTrackCount = tracks.length;
-      const displayName = readString(
-        usersRow.name ?? usersRow.nickname ?? usersRow.username,
-        tokenProfile?.name || "HUM User",
-      );
+      const apiName = readString(usersRow.name ?? usersRow.nickname ?? usersRow.username, "");
+      const displayName = pickDisplayName(apiName, tokenProfile);
 
       set({
         wordList: words,
@@ -320,7 +318,7 @@ function applyDummyData(
     };
   const profile =
     ((dummyData as { profile?: ProfileData }).profile as ProfileData | undefined) ?? {
-      email: "user@example.com",
+      email: "",
       level: "Beginner",
       streakDays: 0,
       favoriteLanguage: "ENGLISH",
@@ -329,7 +327,7 @@ function applyDummyData(
     };
   const mergedName = tokenProfile?.name || user.name || dashboard.greetingName || "HUM User";
   const mergedAvatar = tokenProfile?.avatarText || mergedName.charAt(0).toUpperCase() || "H";
-  const mergedEmail = tokenProfile?.email || (profile.email === "user@example.com" ? "" : profile.email);
+  const mergedEmail = tokenProfile?.email || profile.email || "";
 
   set({
     wordList: words,
@@ -502,4 +500,41 @@ function pickCoverColors(index: number, platform: Platform): [string, string] {
 
   const candidates = paletteByPlatform[platform];
   return candidates[index % candidates.length];
+}
+
+function pickDisplayName(apiName: string, tokenProfile: TokenProfile | null) {
+  const trimmedApiName = apiName.trim();
+  if (trimmedApiName && !isLikelyInternalIdentifier(trimmedApiName)) {
+    return trimmedApiName;
+  }
+
+  if (tokenProfile?.name?.trim()) {
+    return tokenProfile.name.trim();
+  }
+
+  if (tokenProfile?.email?.includes("@")) {
+    return tokenProfile.email.split("@")[0] || "HUM User";
+  }
+
+  return "HUM User";
+}
+
+function isLikelyInternalIdentifier(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return true;
+  }
+  if (trimmed.includes("@")) {
+    return false;
+  }
+
+  const lowered = trimmed.toLowerCase();
+  if (lowered.includes("internal") || lowered.includes("uuid") || lowered.includes("user_")) {
+    return true;
+  }
+
+  const compact = trimmed.replace(/[-_]/g, "");
+  const hasLetters = /[a-zA-Z]/.test(compact);
+  const hasNumbers = /\d/.test(compact);
+  return compact.length >= 16 && hasLetters && hasNumbers;
 }

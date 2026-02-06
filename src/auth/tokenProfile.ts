@@ -30,7 +30,6 @@ export function readProfileFromStoredToken(): TokenProfile | null {
     readString(payload.preferred_username) ??
     readString(payload.given_name) ??
     readString(payload.user_name) ??
-    readString(payload.sub) ??
     "";
 
   const email = readString(payload.email) ?? readString(payload.upn) ?? "";
