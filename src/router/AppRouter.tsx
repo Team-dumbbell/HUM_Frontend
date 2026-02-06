@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import App from "../App";
 import DashboardPage from "../pages/DashboardPage";
 import LoginPage from "../pages/LoginPage";
@@ -8,8 +8,10 @@ import WordDetailPage from "../pages/WordDetailPage";
 import RequireAuth from "./RequireAuth";
 
 export default function AppRouter() {
+  const Router = import.meta.env.PROD ? HashRouter : BrowserRouter;
+
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
@@ -23,6 +25,6 @@ export default function AppRouter() {
         </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
