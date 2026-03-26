@@ -19,6 +19,7 @@ type WordItem = {
   frequency: number;
   addedAt: string;
   language: Exclude<Language, "ALL">;
+  example?: string;
   synonyms?: string[];
 };
 
@@ -133,8 +134,7 @@ export const useWordStore = create<WordStore>((set, get) => ({
       let hasSuccessfulResponse = false;
 
       const profilePromise = safeApiGet("/user/profile");
-      const vocabularyPromise = safeApiGet("/vocabulary/lists");
-      const wordsPromise = safeApiGet("/user/words");
+      const wordsPromise = safeApiGet("/api/v1/vocab/list");
 
       const profileTask = profilePromise.then((profileRes) => {
         if (!profileRes) return;
@@ -205,9 +205,10 @@ export const useWordStore = create<WordStore>((set, get) => ({
             partOfSpeech: readString(row.part_of_speech ?? row.partOfSpeech ?? row.pos, "기타"),
             artist: readString(row.artist ?? row.song_artist, "-"),
             song: readString(
-              row.song ?? row.song_title ?? row.track_title ?? row.music_title,
+              row.song ?? row.song_title ?? row.track_title ?? row.musicTitle ?? row.music_title,
               "-",
             ),
+            example: readString(row.example ?? row.sentence, ""),
             frequency: readNumber(row.frequency ?? row.count ?? row.capture_count, 1),
             addedAt: formatDateLabel(row.created_at ?? row.added_at ?? row.updated_at),
             language: parseLanguage(row.language ?? row.lang),
@@ -233,35 +234,7 @@ export const useWordStore = create<WordStore>((set, get) => ({
         }));
       });
 
-      const vocabularyTask = vocabularyPromise.then((vocabularyRes) => {
-        if (!vocabularyRes) return;
-        hasSuccessfulResponse = true;
-
-        const vocabularyPayload = unwrapObject(vocabularyRes);
-        const vocabularyLists = unwrapArray(
-          vocabularyPayload.vocabulary_lists ?? vocabularyPayload.data ?? vocabularyRes ?? [],
-        );
-        const fallbackWordCount = countEntriesFromVocabularyLists(vocabularyLists);
-        if (fallbackWordCount <= 0) return;
-
-        set((state) => {
-          if (state.wordList.length > 0) {
-            return {};
-          }
-          return {
-            dashboard: {
-              ...state.dashboard,
-              totalWords: fallbackWordCount,
-            },
-            profile: {
-              ...state.profile,
-              totalCapturedWords: fallbackWordCount,
-            },
-          };
-        });
-      });
-
-      await Promise.allSettled([profileTask, wordsTask, vocabularyTask]);
+      await Promise.allSettled([profileTask, wordsTask]);
 
       if (!hasSuccessfulResponse) {
         applyDummyData(set, tokenProfile);
@@ -476,15 +449,6 @@ function formatDateLabel(value: unknown) {
   return `${year}.${month}`;
 }
 
-function countEntriesFromVocabularyLists(items: unknown[]) {
-  return items.reduce<number>((count, item) => {
-    const row = unwrapObject(item);
-    if (Array.isArray(row.entries)) {
-      return count + row.entries.length;
-    }
-    return count;
-  }, 0);
-}
 
 function buildSynonymMap(items: unknown[]) {
   const map = new Map<string, string[]>();

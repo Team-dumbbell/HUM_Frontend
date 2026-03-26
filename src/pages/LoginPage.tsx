@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
-import { FiMusic, FiShield, FiZap } from "react-icons/fi";
+import { useEffect, useState } from "react";
+import { FiAlertCircle, FiMusic, FiShield, FiZap } from "react-icons/fi";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
@@ -11,6 +12,14 @@ export default function LoginPage() {
   const location = useLocation();
   const { loginWithGoogle, isLoggedIn } = useAuth();
   const target = (location.state as LocationState | null)?.from || "/dashboard";
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  useEffect(() => {
+    if (window.sessionStorage.getItem("onewave_session_expired")) {
+      setSessionExpired(true);
+      window.sessionStorage.removeItem("onewave_session_expired");
+    }
+  }, []);
 
   if (isLoggedIn) {
     return <Navigate to={target} replace />;
@@ -48,6 +57,12 @@ export default function LoginPage() {
         </Hero>
 
         <LoginPanel>
+          {sessionExpired && (
+            <SessionBanner>
+              <FiAlertCircle size={16} />
+              세션이 만료되었습니다. 다시 로그인해주세요.
+            </SessionBanner>
+          )}
           <Heading>반가워요!</Heading>
           <SubHeading>서비스 이용을 위해 로그인이 필요합니다.</SubHeading>
 
@@ -324,6 +339,20 @@ const FeatureText = styled.p`
   color: #70809f;
   font-size: clamp(14px, 1.05vw, 16px);
   line-height: 1.45;
+`;
+
+const SessionBanner = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  color: #7a5c00;
+  font-size: clamp(13px, 1vw, 15px);
+  font-weight: 600;
+  margin-bottom: 8px;
 `;
 
 const PolicyText = styled.p`
