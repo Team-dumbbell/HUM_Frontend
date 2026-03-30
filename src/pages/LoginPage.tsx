@@ -1,12 +1,8 @@
 import styled from "@emotion/styled";
-<<<<<<< HEAD
-import { FiMusic, FiShield, FiZap } from "react-icons/fi";
-=======
-import { useEffect, useState } from "react";
 import { FiAlertCircle, FiMusic, FiShield, FiZap } from "react-icons/fi";
->>>>>>> 1cc32162c02a90b2c5619b28e77cf15cf8e5f0e0
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { useEffect, useState } from "react";
 
 type LocationState = {
   from?: string;
