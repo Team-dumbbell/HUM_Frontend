@@ -1,5 +1,5 @@
 const rawBaseUrl = import.meta.env.VITE_BASE_URL?.trim() ?? "";
-const TOKEN_KEY = "onewave_auth_token";
+export const TOKEN_KEY = "onewave_auth_token";
 
 const normalizedBaseUrl = rawBaseUrl
   ? /^https?:\/\//i.test(rawBaseUrl)
@@ -16,21 +16,59 @@ export function buildApiUrl(path: string) {
   return `${normalizedBaseUrl}${sanitizedPath}`;
 }
 
-export async function apiGet<T>(path: string): Promise<T> {
+function getAuthHeaders(): Record<string, string> {
   const authToken =
     typeof window === "undefined" ? null : window.localStorage.getItem(TOKEN_KEY);
+  return authToken ? { Authorization: `Bearer ${authToken}` } : {};
+}
 
+function handleUnauthorized() {
+  window.localStorage.removeItem(TOKEN_KEY);
+  window.sessionStorage.setItem("onewave_session_expired", "1");
+  window.location.href = "/login";
+}
+
+export async function apiGet<T>(path: string): Promise<T> {
   const response = await fetch(buildApiUrl(path), {
     method: "GET",
     credentials: "include",
     headers: {
       Accept: "application/json",
-      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      ...getAuthHeaders(),
     },
   });
 
+  if (response.status === 401) {
+    handleUnauthorized();
+    throw new Error("Unauthorized");
+  }
+
   if (!response.ok) {
     throw new Error(`GET ${path} failed: ${response.status}`);
+  }
+
+  return (await response.json()) as T;
+}
+
+export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
+  const response = await fetch(buildApiUrl(path), {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      ...getAuthHeaders(),
+    },
+    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+  });
+
+  if (response.status === 401) {
+    handleUnauthorized();
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    throw new Error(`POST ${path} failed: ${response.status}`);
   }
 
   return (await response.json()) as T;

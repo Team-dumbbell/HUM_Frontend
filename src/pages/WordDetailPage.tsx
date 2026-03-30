@@ -85,15 +85,8 @@ export default function WordDetailPage() {
       id: 1,
       artist: word.artist,
       song: word.song,
-      lyric: `It's the ${word.word} of just you and me`,
-      release: "2025.03",
-    },
-    {
-      id: 2,
-      artist: "Taylor Swift",
-      song: "Invisible String",
-      lyric: `Isn't it just so pretty to think that all along there was some invisible string tying you to ${word.word}?`,
-      release: "2025.02",
+      lyric: word.example || `It's the ${word.word} of just you and me`,
+      release: word.addedAt || "2025.03",
     },
   ];
 
