@@ -4,7 +4,9 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:api.github.com)",
-      "Bash(yarn build:*)"
+      "Bash(yarn build:*)",
+      "Bash(curl -s \"http://team-moleback.store/swagger-ui/index.html\")",
+      "Bash(curl -s \"http://team-moleback.store/v3/api-docs\")"
     ]
   }
 }

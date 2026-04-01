@@ -185,8 +185,11 @@ export const useWordStore = create<WordStore>((set, get) => ({
         if (!wordsRes) return;
         hasSuccessfulResponse = true;
 
-        const wordsPayload = unwrapObject(wordsRes);
-        const userWordsRows = unwrapArray(wordsPayload.user_words ?? wordsPayload.data ?? wordsRes ?? []);
+        // Backend returns WordResponse[] directly as an array
+        const userWordsRows = Array.isArray(wordsRes)
+          ? wordsRes
+          : unwrapArray(unwrapObject(wordsRes).user_words ?? unwrapObject(wordsRes).data ?? []);
+        const wordsPayload = Array.isArray(wordsRes) ? {} : unwrapObject(wordsRes);
         const synonymRows = unwrapArray(wordsPayload.word_synonyms ?? []);
         const synonymsByWord = buildSynonymMap(synonymRows);
 
@@ -211,7 +214,7 @@ export const useWordStore = create<WordStore>((set, get) => ({
             example: readString(row.example ?? row.sentence, ""),
             frequency: readNumber(row.frequency ?? row.count ?? row.capture_count, 1),
             addedAt: formatDateLabel(row.created_at ?? row.added_at ?? row.updated_at),
-            language: parseLanguage(row.language ?? row.lang),
+            language: parseLanguage(row.language ?? row.lang, word),
             synonyms: mappedSynonyms,
           } satisfies WordItem;
         });
@@ -423,13 +426,16 @@ function readStringArray(value: unknown) {
   return value.map((item) => readString(item, "")).filter(Boolean);
 }
 
-function parseLanguage(value: unknown): Exclude<Language, "ALL"> {
-  const normalized = readString(value, "ENGLISH").toUpperCase();
-  if (normalized.startsWith("KO")) {
-    return "KOREAN";
-  }
-  if (normalized.startsWith("JA")) {
-    return "JAPANESE";
+function parseLanguage(value: unknown, wordText?: string): Exclude<Language, "ALL"> {
+  const normalized = readString(value, "").toUpperCase();
+  if (normalized.startsWith("KO")) return "KOREAN";
+  if (normalized.startsWith("JA")) return "JAPANESE";
+  if (normalized.startsWith("EN")) return "ENGLISH";
+
+  // Infer from word text when backend doesn't provide language field
+  if (wordText) {
+    if (/[\u3040-\u30FF\u4E00-\u9FFF]/.test(wordText)) return "JAPANESE";
+    if (/[\uAC00-\uD7A3]/.test(wordText)) return "KOREAN";
   }
   return "ENGLISH";
 }

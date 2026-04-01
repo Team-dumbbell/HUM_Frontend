@@ -71,5 +71,9 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
     throw new Error(`POST ${path} failed: ${response.status}`);
   }
 
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) {
+    return (await response.text()) as unknown as T;
+  }
   return (await response.json()) as T;
 }
