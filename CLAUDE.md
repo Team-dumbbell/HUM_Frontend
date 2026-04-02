@@ -1,4 +1,4 @@
-# OneWave — CLAUDE.md
+# HUM — CLAUDE.md
 
 음악을 통해 언어를 학습하는 React SPA 프로젝트. 수집한 단어와 트랙을 관리하고 탐색하는 대시보드.
 

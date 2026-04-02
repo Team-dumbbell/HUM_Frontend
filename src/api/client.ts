@@ -19,7 +19,7 @@ export function buildApiUrl(path: string) {
 function getAuthHeaders(): Record<string, string> {
   const authToken =
     typeof window === "undefined" ? null : window.localStorage.getItem(TOKEN_KEY);
-  return authToken ? { Authorization: `Bearer ${authToken}` } : {};
+  return authToken ? { Authorization: authToken } : {};
 }
 
 function handleUnauthorized() {
