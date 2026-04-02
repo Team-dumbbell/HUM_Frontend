@@ -58,7 +58,17 @@ export default function TrackListPage() {
     setSearchError(false);
     try {
       const results = await searchLyrics(lyricsQuery.trim());
-      setSearchResults(Array.isArray(results) ? results : []);
+      const raw = Array.isArray(results) ? results : [];
+      const q = lyricsQuery.trim().toLowerCase();
+      const sorted = [...raw].sort((a, b) => {
+        const aName = a.trackName.toLowerCase();
+        const bName = b.trackName.toLowerCase();
+        const aIdx = aName.indexOf(q);
+        const bIdx = bName.indexOf(q);
+        if (aIdx !== bIdx) return (aIdx === -1 ? Infinity : aIdx) - (bIdx === -1 ? Infinity : bIdx);
+        return aName.localeCompare(bName);
+      });
+      setSearchResults(sorted);
     } catch {
       setSearchError(true);
     } finally {
