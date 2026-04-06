@@ -139,7 +139,7 @@ export default function WordDetailPage() {
     },
   ];
 
-  function handleSpeak() {
+  const handleSpeak = () => {
     if (speaking) {
       window.speechSynthesis.cancel();
       setSpeaking(false);
@@ -153,7 +153,7 @@ export default function WordDetailPage() {
     utteranceRef.current = utterance;
     setSpeaking(true);
     window.speechSynthesis.speak(utterance);
-  }
+  };
 
   const pronunciation = `/${word.word.toLowerCase()}/`;
   const addedAtDate = /^\d{4}\.\d{2}$/.test(word.addedAt)
