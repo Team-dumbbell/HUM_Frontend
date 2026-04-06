@@ -399,20 +399,22 @@ function WordCard(props: { item: WordItem; mobile?: boolean; showExample?: boole
   return (
     <Card mobile={mobile} clickable={Boolean(onClick)} onClick={onClick}>
       <CardHead>
-        {showExample ? (
-          <Example>{item.example || "-"}</Example>
-        ) : (
-          <Word>{item.word}</Word>
-        )}
+        <Word>{item.word}</Word>
         <Badge>{item.partOfSpeech}</Badge>
       </CardHead>
       <Meaning>{item.meaning}</Meaning>
 
       <TrackRow>
-        <FiMusic size={16} />
-        <span>
-          {item.song} - {item.artist}
-        </span>
+        {showExample ? (
+          <Example>{item.example || "-"}</Example>
+        ) : (
+          <>
+            <FiMusic size={16} />
+            <span>
+              {item.song} - {item.artist}
+            </span>
+          </>
+        )}
       </TrackRow>
 
       <Meta>
@@ -623,12 +625,11 @@ const Word = styled.h2`
   font-size: 30px;
 `;
 
-const Example = styled.p`
-  margin: 0;
+const Example = styled.span`
   font-size: 14px;
-  color: ${({ theme }) => theme.color.subtext};
+  color: #95a0b6;
   font-style: italic;
-  line-height: 1.5;
+  line-height: 1.4;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
