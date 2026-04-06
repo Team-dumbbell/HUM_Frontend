@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useMediaQuery } from "../shared/hooks/useMediaQueryl";
 import WebSidebar from "../layout/WebSidebar";
 import { useWordStore } from "../store/useWordStore";
+import AttendanceHeatmap from "../shared/components/AttendanceHeatmap";
 
 type NavItem = {
   id: "dashboard" | "words" | "tracks" | "profile";
@@ -107,6 +108,10 @@ function DesktopDashboard() {
               <StatValue>{dashboard.totalTracks}</StatValue>
             </StatCard>
           </StatGrid>
+
+          <Section>
+            <AttendanceHeatmap />
+          </Section>
 
           <Section>
             <SectionHead>
@@ -224,6 +229,10 @@ function MobileDashboard() {
             <StatValue mobile>{dashboard.totalTracks}</StatValue>
           </StatCard>
         </MobileStatGrid>
+
+        <Section>
+          <AttendanceHeatmap compact />
+        </Section>
 
         <Section>
           <SectionHead>

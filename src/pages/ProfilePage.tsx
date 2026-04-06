@@ -1,5 +1,6 @@
 import { useEffect, type ComponentType } from "react";
 import styled from "@emotion/styled";
+import AttendanceHeatmap from "../shared/components/AttendanceHeatmap";
 import { FaGoogle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import {
@@ -147,6 +148,10 @@ export default function ProfilePage() {
             </ProfileMain>
           </ProfileCard>
 
+          <HeatmapSection>
+            <AttendanceHeatmap compact />
+          </HeatmapSection>
+
           <SettingSectionList />
 
           <FooterText>
@@ -197,6 +202,10 @@ export default function ProfilePage() {
               </ProfileText>
             </ProfileMain>
           </ProfileCard>
+
+          <HeatmapSection>
+            <AttendanceHeatmap />
+          </HeatmapSection>
 
           <SettingSectionList />
 
@@ -407,6 +416,10 @@ const EditButton = styled.button`
 
 const LogoutButton = styled(EditButton)`
   color: #ff2b2b;
+`;
+
+const HeatmapSection = styled.div`
+  margin-top: 16px;
 `;
 
 const SectionList = styled.div`
