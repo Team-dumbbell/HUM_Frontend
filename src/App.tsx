@@ -23,6 +23,7 @@ type WordItem = {
   frequency: number;
   addedAt: string;
   language: "ENGLISH" | "JAPANESE" | "KOREAN";
+  example?: string;
 };
 
 type TrackItem = {
@@ -239,7 +240,7 @@ function App() {
 
       <WordGrid mobile>
         {pageWords.map((item) => (
-          <WordCard key={item.id} item={item} mobile onClick={() => navigate(`/words/${item.id}`)} />
+          <WordCard key={item.id} item={item} mobile showExample={Boolean(selectedTrack)} onClick={() => navigate(`/words/${item.id}`)} />
         ))}
       </WordGrid>
 
@@ -333,7 +334,7 @@ function App() {
 
         <WordGrid>
           {pageWords.map((item) => (
-            <WordCard key={item.id} item={item} onClick={() => navigate(`/words/${item.id}`)} />
+            <WordCard key={item.id} item={item} showExample={Boolean(selectedTrack)} onClick={() => navigate(`/words/${item.id}`)} />
           ))}
         </WordGrid>
 
@@ -392,13 +393,17 @@ function TrackSummaryCard(props: { track: TrackItem; mobile?: boolean }) {
   );
 }
 
-function WordCard(props: { item: WordItem; mobile?: boolean; onClick?: () => void }) {
-  const { item, mobile = false, onClick } = props;
+function WordCard(props: { item: WordItem; mobile?: boolean; showExample?: boolean; onClick?: () => void }) {
+  const { item, mobile = false, showExample = false, onClick } = props;
 
   return (
     <Card mobile={mobile} clickable={Boolean(onClick)} onClick={onClick}>
       <CardHead>
-        <Word>{item.word}</Word>
+        {showExample ? (
+          <Example>{item.example || "-"}</Example>
+        ) : (
+          <Word>{item.word}</Word>
+        )}
         <Badge>{item.partOfSpeech}</Badge>
       </CardHead>
       <Meaning>{item.meaning}</Meaning>
@@ -616,6 +621,18 @@ const CardHead = styled.div`
 const Word = styled.h2`
   margin: 0;
   font-size: 30px;
+`;
+
+const Example = styled.p`
+  margin: 0;
+  font-size: 14px;
+  color: ${({ theme }) => theme.color.subtext};
+  font-style: italic;
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 `;
 
 const Badge = styled.span`
