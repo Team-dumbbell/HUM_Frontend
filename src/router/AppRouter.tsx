@@ -3,6 +3,7 @@ import App from "../App";
 import AuthCallbackPage from "../pages/AuthCallbackPage";
 import DashboardPage from "../pages/DashboardPage";
 import LoginPage from "../pages/LoginPage";
+import OnboardingPage from "../pages/OnboardingPage";
 import ProfilePage from "../pages/ProfilePage";
 import TrackListPage from "../pages/TrackListPage";
 import WordDetailPage from "../pages/WordDetailPage";
@@ -16,6 +17,7 @@ export default function AppRouter() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route element={<RequireAuth />}>
+          <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/words" element={<App />} />
           <Route path="/tracks" element={<TrackListPage />} />

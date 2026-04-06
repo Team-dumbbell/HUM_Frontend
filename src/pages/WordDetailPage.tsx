@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import styled from "@emotion/styled";
 import {
   FiBookmark,
@@ -53,10 +53,18 @@ function highlightWord(text: string, word: string) {
   );
 }
 
+const LANG_MAP: Record<string, string> = {
+  ENGLISH: "en-US",
+  JAPANESE: "ja-JP",
+  KOREAN: "ko-KR",
+};
+
 export default function WordDetailPage() {
   const isMobile = useMediaQuery("(max-width: 1023px)");
   const navigate = useNavigate();
   const { wordId } = useParams();
+  const [speaking, setSpeaking] = useState(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const { wordList, fetchAppData } = useWordStore();
 
@@ -131,6 +139,22 @@ export default function WordDetailPage() {
     },
   ];
 
+  function handleSpeak() {
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(word.word);
+    utterance.lang = LANG_MAP[word.language] ?? "en-US";
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
+    utteranceRef.current = utterance;
+    setSpeaking(true);
+    window.speechSynthesis.speak(utterance);
+  }
+
   const pronunciation = `/${word.word.toLowerCase()}/`;
   const addedAtDate = /^\d{4}\.\d{2}$/.test(word.addedAt)
     ? `${word.addedAt}.15`
@@ -141,7 +165,7 @@ export default function WordDetailPage() {
       <WordType>{word.partOfSpeech}</WordType>
       <WordRow>
         <Word>{word.word}</Word>
-        <SoundButton>
+        <SoundButton onClick={handleSpeak} speaking={speaking}>
           <FiVolume2 size={26} />
         </SoundButton>
       </WordRow>
@@ -410,15 +434,18 @@ const Word = styled.h2`
   color: #061436;
 `;
 
-const SoundButton = styled.button`
+const SoundButton = styled.button<{ speaking?: boolean }>`
   width: 50px;
   height: 50px;
   border: 0;
   border-radius: 14px;
-  background: #00b574;
+  background: ${({ speaking }) => (speaking ? "#008f5a" : "#00b574")};
   color: #ffffff;
   display: grid;
   place-items: center;
+  cursor: pointer;
+  opacity: ${({ speaking }) => (speaking ? 0.85 : 1)};
+  transition: background 0.15s, opacity 0.15s;
 `;
 
 const Pronunciation = styled.p`

@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { completeAuthFromRedirectHash } from "../auth/auth";
+import { isOnboardingDone } from "./OnboardingPage";
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate();
@@ -20,7 +21,9 @@ export default function AuthCallbackPage() {
     window.history.replaceState(null, document.title, sanitizedUrl);
 
     void refreshSession().finally(() => {
-      navigate("/dashboard", { replace: true });
+      const destination =
+        callbackResult.isNewUser && !isOnboardingDone() ? "/onboarding" : "/dashboard";
+      navigate(destination, { replace: true });
     });
   }, [navigate, refreshSession]);
 
