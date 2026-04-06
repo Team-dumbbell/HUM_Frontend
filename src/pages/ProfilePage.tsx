@@ -1,4 +1,4 @@
-import { useEffect, type ComponentType } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import styled from "@emotion/styled";
 import AttendanceHeatmap from "../shared/components/AttendanceHeatmap";
 import { FaGoogle } from "react-icons/fa";
@@ -106,9 +106,14 @@ export default function ProfilePage() {
     fetchAppData();
   }, [fetchAppData]);
 
+  const [isEditing, setIsEditing] = useState(false);
+
   const displayName = user.name.trim() || "HUM User";
   const displayEmail = profile.email.trim() || "등록된 이메일이 없습니다.";
   const avatarText = (user.avatarText.trim() || displayName.charAt(0) || "H").toUpperCase();
+
+  const nativeLanguage = "한국어";
+  const learningLanguage = profile.favoriteLanguage === "JAPANESE" ? "일본어" : profile.favoriteLanguage === "KOREAN" ? "한국어" : "영어";
 
   const handleLogout = () => {
     logout();
@@ -127,9 +132,11 @@ export default function ProfilePage() {
             <ProfileMain>
               <AvatarWrap>
                 <AvatarCircle>{avatarText}</AvatarCircle>
-                <CameraBadge type="button" aria-label="프로필 이미지 변경">
-                  <FiCamera size={14} />
-                </CameraBadge>
+                {isEditing && (
+                  <CameraBadge type="button" aria-label="프로필 이미지 변경">
+                    <FiCamera size={14} />
+                  </CameraBadge>
+                )}
               </AvatarWrap>
 
               <ProfileText>
@@ -139,13 +146,27 @@ export default function ProfilePage() {
                   <span>{displayEmail}</span>
                 </EmailRow>
                 <ButtonRow>
-                  <EditButton type="button">프로필 수정</EditButton>
+                  <EditButton type="button" onClick={() => setIsEditing((v) => !v)}>
+                    {isEditing ? "수정 완료" : "프로필 수정"}
+                  </EditButton>
                   <LogoutButton type="button" onClick={handleLogout}>
                     로그아웃
                   </LogoutButton>
                 </ButtonRow>
               </ProfileText>
             </ProfileMain>
+
+            <LanguageRow>
+              <LanguageItem>
+                <LanguageLabel>모국어</LanguageLabel>
+                <LanguageValue>{nativeLanguage}</LanguageValue>
+              </LanguageItem>
+              <LanguageDivider />
+              <LanguageItem>
+                <LanguageLabel>학습 중인 언어</LanguageLabel>
+                <LanguageValue>{learningLanguage}</LanguageValue>
+              </LanguageItem>
+            </LanguageRow>
           </ProfileCard>
 
           <HeatmapSection>
@@ -182,9 +203,11 @@ export default function ProfilePage() {
             <ProfileMain>
               <AvatarWrap>
                 <AvatarCircle>{avatarText}</AvatarCircle>
-                <CameraBadge type="button" aria-label="프로필 이미지 변경">
-                  <FiCamera size={14} />
-                </CameraBadge>
+                {isEditing && (
+                  <CameraBadge type="button" aria-label="프로필 이미지 변경">
+                    <FiCamera size={14} />
+                  </CameraBadge>
+                )}
               </AvatarWrap>
 
               <ProfileText>
@@ -194,13 +217,27 @@ export default function ProfilePage() {
                   <span>{displayEmail}</span>
                 </EmailRow>
                 <ButtonRow>
-                  <EditButton type="button">프로필 수정</EditButton>
+                  <EditButton type="button" onClick={() => setIsEditing((v) => !v)}>
+                    {isEditing ? "수정 완료" : "프로필 수정"}
+                  </EditButton>
                   <LogoutButton type="button" onClick={handleLogout}>
                     로그아웃
                   </LogoutButton>
                 </ButtonRow>
               </ProfileText>
             </ProfileMain>
+
+            <LanguageRow>
+              <LanguageItem>
+                <LanguageLabel>모국어</LanguageLabel>
+                <LanguageValue>{nativeLanguage}</LanguageValue>
+              </LanguageItem>
+              <LanguageDivider />
+              <LanguageItem>
+                <LanguageLabel>학습 중인 언어</LanguageLabel>
+                <LanguageValue>{learningLanguage}</LanguageValue>
+              </LanguageItem>
+            </LanguageRow>
           </ProfileCard>
 
           <HeatmapSection>
@@ -416,6 +453,50 @@ const EditButton = styled.button`
 
 const LogoutButton = styled(EditButton)`
   color: #ff2b2b;
+`;
+
+const LanguageRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #edf1f7;
+`;
+
+const LanguageItem = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+`;
+
+const LanguageDivider = styled.div`
+  width: 1px;
+  height: 36px;
+  background: #edf1f7;
+`;
+
+const LanguageLabel = styled.span`
+  color: #a0abc0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+
+  @media (max-width: 1023px) {
+    font-size: 11px;
+  }
+`;
+
+const LanguageValue = styled.span`
+  color: #1c2a44;
+  font-size: 16px;
+  font-weight: 800;
+
+  @media (max-width: 1023px) {
+    font-size: 14px;
+  }
 `;
 
 const HeatmapSection = styled.div`

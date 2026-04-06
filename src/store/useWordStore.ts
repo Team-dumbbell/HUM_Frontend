@@ -73,6 +73,7 @@ type WordStore = {
   setLanguage: (v: Language) => void;
   setTrackPlatformFilter: (v: PlatformFilter) => void;
   setTrackSortType: (v: TrackSortType | ((prev: TrackSortType) => TrackSortType)) => void;
+  deleteWord: (id: number) => void;
 
   fetchAppData: () => Promise<void>;
 
@@ -115,6 +116,17 @@ export const useWordStore = create<WordStore>((set, get) => ({
   setSortType: (v) => set({ sortType: v }),
   setLanguage: (v) => set({ language: v }),
   setTrackPlatformFilter: (v) => set({ trackPlatformFilter: v }),
+  deleteWord: (id) =>
+    set((state) => {
+      const wordList = state.wordList.filter((w) => w.id !== id);
+      const trackList = buildTracksFromWords(wordList);
+      return {
+        wordList,
+        trackList,
+        dashboard: { ...state.dashboard, totalWords: wordList.length, totalTracks: trackList.length },
+        profile: { ...state.profile, totalCapturedWords: wordList.length, totalCapturedTracks: trackList.length },
+      };
+    }),
   setTrackSortType: (v) =>
     set((state) => ({
       trackSortType:

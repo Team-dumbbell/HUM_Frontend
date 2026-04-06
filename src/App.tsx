@@ -6,6 +6,7 @@ import {
   FiList,
   FiLoader,
   FiMusic,
+  FiTrash2,
 } from "react-icons/fi";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import MobileShell from "./layout/MobileShell";
@@ -61,6 +62,7 @@ function App() {
     setSortType,
     setLanguage,
     fetchAppData,
+    deleteWord,
   } = useWordStore();
 
   useEffect(() => {
@@ -240,7 +242,7 @@ function App() {
 
       <WordGrid mobile>
         {pageWords.map((item) => (
-          <WordCard key={item.id} item={item} mobile showExample={Boolean(selectedTrack)} onClick={() => navigate(`/words/${item.id}`)} />
+          <WordCard key={item.id} item={item} mobile showExample={Boolean(selectedTrack)} onClick={() => navigate(`/words/${item.id}`)} onDelete={() => deleteWord(item.id)} />
         ))}
       </WordGrid>
 
@@ -334,7 +336,7 @@ function App() {
 
         <WordGrid>
           {pageWords.map((item) => (
-            <WordCard key={item.id} item={item} showExample={Boolean(selectedTrack)} onClick={() => navigate(`/words/${item.id}`)} />
+            <WordCard key={item.id} item={item} showExample={Boolean(selectedTrack)} onClick={() => navigate(`/words/${item.id}`)} onDelete={() => deleteWord(item.id)} />
           ))}
         </WordGrid>
 
@@ -393,14 +395,27 @@ function TrackSummaryCard(props: { track: TrackItem; mobile?: boolean }) {
   );
 }
 
-function WordCard(props: { item: WordItem; mobile?: boolean; showExample?: boolean; onClick?: () => void }) {
-  const { item, mobile = false, showExample = false, onClick } = props;
+function WordCard(props: { item: WordItem; mobile?: boolean; showExample?: boolean; onClick?: () => void; onDelete?: () => void }) {
+  const { item, mobile = false, showExample = false, onClick, onDelete } = props;
 
   return (
     <Card mobile={mobile} clickable={Boolean(onClick)} onClick={onClick}>
       <CardHead>
         <Word>{item.word}</Word>
-        <Badge>{item.partOfSpeech}</Badge>
+        <CardHeadRight>
+          <Badge>{item.partOfSpeech}</Badge>
+          {onDelete && (
+            <DeleteBtn
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              aria-label="단어 삭제"
+            >
+              <FiTrash2 size={15} />
+            </DeleteBtn>
+          )}
+        </CardHeadRight>
       </CardHead>
       <Meaning>{item.meaning}</Meaning>
 
@@ -618,6 +633,32 @@ const CardHead = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+`;
+
+const CardHeadRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+`;
+
+const DeleteBtn = styled.button`
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid ${({ theme }) => theme.color.line};
+  background: transparent;
+  color: #b0b8cc;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover {
+    color: #e05252;
+    border-color: #e05252;
+  }
 `;
 
 const Word = styled.h2`
