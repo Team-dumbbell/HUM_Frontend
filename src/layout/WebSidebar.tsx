@@ -1,12 +1,12 @@
 ﻿import styled from "@emotion/styled";
 import type { ComponentType } from "react";
 import { FaItunesNote } from "react-icons/fa";
-import { FiBookOpen, FiHome, FiMusic, FiUser } from "react-icons/fi";
+import { FiBookOpen, FiHome, FiMusic, FiUser, FiZap } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 type Menu = {
-  id: "dashboard" | "vocab" | "track";
+  id: "dashboard" | "vocab" | "track" | "quiz";
   label: string;
   icon: ComponentType<{ size?: number }>;
   path: string;
@@ -16,6 +16,7 @@ const menus: Menu[] = [
   { id: "dashboard", label: "대시보드", icon: FiHome, path: "/dashboard" },
   { id: "vocab", label: "단어장", icon: FiBookOpen, path: "/words" },
   { id: "track", label: "트랙 로그", icon: FiMusic, path: "/tracks" },
+  { id: "quiz", label: "단어 테스트", icon: FiZap, path: "/quiz" },
 ];
 
 export default function WebSidebar() {
@@ -26,6 +27,7 @@ export default function WebSidebar() {
   const isActive = (id: Menu["id"]) => {
     if (id === "track") return pathname.startsWith("/tracks");
     if (id === "vocab") return pathname.startsWith("/words");
+    if (id === "quiz") return pathname.startsWith("/quiz");
     return pathname.startsWith("/dashboard");
   };
 

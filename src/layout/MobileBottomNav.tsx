@@ -1,18 +1,19 @@
 import styled from "@emotion/styled";
 import type { ComponentType } from "react";
-import { FiBookOpen, FiHome, FiMusic, FiUser } from "react-icons/fi";
+import { FiBookOpen, FiHome, FiMusic, FiUser, FiZap } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
 
 type Menu = {
-  id: "dashboard" | "vocab" | "track" | "profile";
+  id: "dashboard" | "vocab" | "track" | "quiz" | "profile";
   label: string;
   icon: ComponentType<{ size?: number }>;
   path: string;
 };
 
 const menus: Menu[] = [
-  { id: "dashboard", label: "대시보드", icon: FiHome, path: "/dashboard" },
+  { id: "dashboard", label: "홈", icon: FiHome, path: "/dashboard" },
   { id: "vocab", label: "단어장", icon: FiBookOpen, path: "/words" },
+  { id: "quiz", label: "테스트", icon: FiZap, path: "/quiz" },
   { id: "track", label: "트랙", icon: FiMusic, path: "/tracks" },
   { id: "profile", label: "프로필", icon: FiUser, path: "/mypage" },
 ];
@@ -25,6 +26,7 @@ export default function MobileBottomNav() {
     if (id === "track") return pathname.startsWith("/tracks");
     if (id === "vocab") return pathname.startsWith("/words");
     if (id === "dashboard") return pathname.startsWith("/dashboard");
+    if (id === "quiz") return pathname.startsWith("/quiz");
     return pathname.startsWith("/mypage") || pathname.startsWith("/profile");
   };
 
@@ -57,7 +59,7 @@ const Wrap = styled.nav`
   background: ${({ theme }) => theme.color.surface};
   border-top: 1px solid ${({ theme }) => theme.color.line};
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   z-index: 20;
 `;
 

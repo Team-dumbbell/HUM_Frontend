@@ -7,6 +7,7 @@ import OnboardingPage from "../pages/OnboardingPage";
 import ProfilePage from "../pages/ProfilePage";
 import TrackListPage from "../pages/TrackListPage";
 import WordDetailPage from "../pages/WordDetailPage";
+import QuizPage from "../pages/QuizPage";
 import RequireAuth from "./RequireAuth";
 
 export default function AppRouter() {
@@ -24,6 +25,7 @@ export default function AppRouter() {
           <Route path="/mypage" element={<ProfilePage />} />
           <Route path="/profile" element={<Navigate to="/mypage" replace />} />
           <Route path="/words/:wordId" element={<WordDetailPage />} />
+          <Route path="/quiz" element={<QuizPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
