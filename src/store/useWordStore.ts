@@ -74,6 +74,7 @@ type WordStore = {
   setTrackPlatformFilter: (v: PlatformFilter) => void;
   setTrackSortType: (v: TrackSortType | ((prev: TrackSortType) => TrackSortType)) => void;
   deleteWord: (id: number) => void;
+  setUserName: (name: string) => void;
 
   fetchAppData: () => Promise<void>;
 
@@ -133,6 +134,11 @@ export const useWordStore = create<WordStore>((set, get) => ({
         typeof v === "function"
           ? (v as (prev: TrackSortType) => TrackSortType)(state.trackSortType)
           : v,
+    })),
+  setUserName: (name) =>
+    set((state) => ({
+      user: { ...state.user, name, avatarText: name.charAt(0).toUpperCase() || state.user.avatarText },
+      dashboard: { ...state.dashboard, greetingName: name },
     })),
 
   fetchAppData: async () => {

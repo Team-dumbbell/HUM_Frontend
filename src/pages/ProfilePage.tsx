@@ -100,17 +100,30 @@ export default function ProfilePage() {
   const isMobile = useMediaQuery("(max-width: 1023px)");
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const { user, profile, fetchAppData } = useWordStore();
+  const { user, profile, fetchAppData, setUserName } = useWordStore();
 
   useEffect(() => {
     fetchAppData();
   }, [fetchAppData]);
 
   const [isEditing, setIsEditing] = useState(false);
+  const [nameInput, setNameInput] = useState("");
 
   const displayName = user.name.trim() || "HUM User";
   const displayEmail = profile.email.trim() || "등록된 이메일이 없습니다.";
   const avatarText = (user.avatarText.trim() || displayName.charAt(0) || "H").toUpperCase();
+
+  const handleEditToggle = () => {
+    if (!isEditing) {
+      setNameInput(displayName);
+    } else {
+      const trimmed = nameInput.trim();
+      if (trimmed && trimmed !== displayName) {
+        setUserName(trimmed);
+      }
+    }
+    setIsEditing((v) => !v);
+  };
 
   const nativeLanguage = "한국어";
   const learningLanguage = profile.favoriteLanguage === "JAPANESE" ? "일본어" : profile.favoriteLanguage === "KOREAN" ? "한국어" : "영어";
@@ -140,14 +153,24 @@ export default function ProfilePage() {
               </AvatarWrap>
 
               <ProfileText>
-                <UserName>{displayName}</UserName>
+                {isEditing ? (
+                  <NameInput
+                    type="text"
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    maxLength={30}
+                    autoFocus
+                  />
+                ) : (
+                  <UserName>{displayName}</UserName>
+                )}
                 <EmailRow>
                   <FaGoogle size={16} />
                   <span>{displayEmail}</span>
                 </EmailRow>
                 <ButtonRow>
-                  <EditButton type="button" onClick={() => setIsEditing((v) => !v)}>
-                    {isEditing ? "수정 완료" : "프로필 수정"}
+                  <EditButton type="button" onClick={handleEditToggle}>
+                    {isEditing ? "저장" : "프로필 수정"}
                   </EditButton>
                   <LogoutButton type="button" onClick={handleLogout}>
                     로그아웃
@@ -211,14 +234,24 @@ export default function ProfilePage() {
               </AvatarWrap>
 
               <ProfileText>
-                <UserName>{displayName}</UserName>
+                {isEditing ? (
+                  <NameInput
+                    type="text"
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    maxLength={30}
+                    autoFocus
+                  />
+                ) : (
+                  <UserName>{displayName}</UserName>
+                )}
                 <EmailRow>
                   <FaGoogle size={16} />
                   <span>{displayEmail}</span>
                 </EmailRow>
                 <ButtonRow>
-                  <EditButton type="button" onClick={() => setIsEditing((v) => !v)}>
-                    {isEditing ? "수정 완료" : "프로필 수정"}
+                  <EditButton type="button" onClick={handleEditToggle}>
+                    {isEditing ? "저장" : "프로필 수정"}
                   </EditButton>
                   <LogoutButton type="button" onClick={handleLogout}>
                     로그아웃
@@ -398,6 +431,25 @@ const CameraBadge = styled.button`
 
 const ProfileText = styled.div`
   min-width: 0;
+`;
+
+const NameInput = styled.input`
+  margin: 0;
+  font-size: 32px;
+  line-height: 1;
+  color: #0f1d3d;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+  border: none;
+  border-bottom: 2px solid #2a6bff;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  padding: 0 0 2px;
+
+  @media (max-width: 1023px) {
+    font-size: 24px;
+  }
 `;
 
 const UserName = styled.h2`
