@@ -101,5 +101,7 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   if (!contentType.includes("application/json")) {
     return (await response.text()) as unknown as T;
   }
-  return (await response.json()) as T;
+  const text = await response.text();
+  if (!text.trim()) return undefined as unknown as T;
+  return JSON.parse(text) as T;
 }
