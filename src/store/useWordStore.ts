@@ -1,5 +1,5 @@
 ﻿import { create } from "zustand";
-import { apiGet } from "../api/client";
+import { apiGet, apiPost, apiDelete } from "../api/client";
 import { readProfileFromStoredToken, type TokenProfile } from "../auth/tokenProfile";
 import dummyData from "../data/dummy.json";
 
@@ -61,6 +61,7 @@ type WordStore = {
   dashboard: DashboardData;
   user: UserData;
   profile: ProfileData;
+  attendedDates: string[];
 
   query: string;
   sortType: SortType;
@@ -73,10 +74,12 @@ type WordStore = {
   setLanguage: (v: Language) => void;
   setTrackPlatformFilter: (v: PlatformFilter) => void;
   setTrackSortType: (v: TrackSortType | ((prev: TrackSortType) => TrackSortType)) => void;
-  deleteWord: (id: number) => void;
+  deleteWord: (id: number) => Promise<void>;
   setUserName: (name: string) => void;
 
   fetchAppData: () => Promise<void>;
+  checkAttendance: () => Promise<void>;
+  fetchMonthlyAttendance: (year: number, month: number) => Promise<void>;
 
   getFilteredWords: () => WordItem[];
   getFilteredTracks: (queryText: string) => TrackItem[];
@@ -106,6 +109,7 @@ export const useWordStore = create<WordStore>((set, get) => ({
     totalCapturedWords: 0,
     totalCapturedTracks: 0,
   },
+  attendedDates: [],
 
   query: "",
   sortType: "latest",
@@ -117,7 +121,8 @@ export const useWordStore = create<WordStore>((set, get) => ({
   setSortType: (v) => set({ sortType: v }),
   setLanguage: (v) => set({ language: v }),
   setTrackPlatformFilter: (v) => set({ trackPlatformFilter: v }),
-  deleteWord: (id) =>
+  deleteWord: async (id) => {
+    await apiDelete<unknown>(`/api/v1/vocab/${id}`);
     set((state) => {
       const wordList = state.wordList.filter((w) => w.id !== id);
       const trackList = buildTracksFromWords(wordList);
@@ -127,7 +132,8 @@ export const useWordStore = create<WordStore>((set, get) => ({
         dashboard: { ...state.dashboard, totalWords: wordList.length, totalTracks: trackList.length },
         profile: { ...state.profile, totalCapturedWords: wordList.length, totalCapturedTracks: trackList.length },
       };
-    }),
+    });
+  },
   setTrackSortType: (v) =>
     set((state) => ({
       trackSortType:
@@ -266,6 +272,36 @@ export const useWordStore = create<WordStore>((set, get) => ({
 
     await appDataRequest;
   },
+
+  checkAttendance: async () => {
+    try {
+      await apiPost<unknown>("/api/attendance/check");
+      const today = new Date().toISOString().slice(0, 10);
+      set((state) => ({
+        attendedDates: state.attendedDates.includes(today)
+          ? state.attendedDates
+          : [...state.attendedDates, today],
+      }));
+    } catch {
+      // 이미 체크된 경우 등 오류 무시
+    }
+  },
+
+  fetchMonthlyAttendance: async (year, month) => {
+    try {
+      const data = await apiGet<{ date: string }[]>(
+        `/api/attendance/monthly?year=${year}&month=${month}`,
+      );
+      const dates = Array.isArray(data) ? data.map((d) => d.date) : [];
+      set((state) => {
+        const merged = Array.from(new Set([...state.attendedDates, ...dates]));
+        return { attendedDates: merged };
+      });
+    } catch {
+      // 출석 데이터 로드 실패 시 기존 상태 유지
+    }
+  },
+
   getFilteredWords: () => {
     const { wordList, query, sortType, language } = get();
 

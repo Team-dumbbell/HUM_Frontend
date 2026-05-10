@@ -50,6 +50,32 @@ export async function apiGet<T>(path: string): Promise<T> {
   return (await response.json()) as T;
 }
 
+export async function apiDelete<T>(path: string): Promise<T> {
+  const response = await fetch(buildApiUrl(path), {
+    method: "DELETE",
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+      ...getAuthHeaders(),
+    },
+  });
+
+  if (response.status === 401) {
+    handleUnauthorized();
+    throw new Error("Unauthorized");
+  }
+
+  if (!response.ok) {
+    throw new Error(`DELETE ${path} failed: ${response.status}`);
+  }
+
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) {
+    return (await response.text()) as unknown as T;
+  }
+  return (await response.json()) as T;
+}
+
 export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   const response = await fetch(buildApiUrl(path), {
     method: "POST",

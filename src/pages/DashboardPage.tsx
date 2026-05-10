@@ -42,11 +42,14 @@ export default function DashboardPage() {
 }
 
 function DesktopDashboard() {
-  const { user, dashboard, fetchAppData, getDashboardRecentWords, getDashboardRecentTracks } = useWordStore();
+  const { user, dashboard, attendedDates, fetchAppData, checkAttendance, fetchMonthlyAttendance, getDashboardRecentWords, getDashboardRecentTracks } = useWordStore();
 
   useEffect(() => {
     fetchAppData();
-  }, [fetchAppData]);
+    checkAttendance();
+    const now = new Date();
+    fetchMonthlyAttendance(now.getFullYear(), now.getMonth() + 1);
+  }, [fetchAppData, checkAttendance, fetchMonthlyAttendance]);
 
   const recentWords: WordCard[] = useMemo(
     () =>
@@ -110,7 +113,7 @@ function DesktopDashboard() {
           </StatGrid>
 
           <Section>
-            <AttendanceHeatmap />
+            <AttendanceHeatmap attendedDates={attendedDates} />
           </Section>
 
           <Section>
@@ -161,11 +164,14 @@ function DesktopDashboard() {
 function MobileDashboard() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { user, dashboard, fetchAppData, getDashboardRecentWords, getDashboardRecentTracks } = useWordStore();
+  const { user, dashboard, attendedDates, fetchAppData, checkAttendance, fetchMonthlyAttendance, getDashboardRecentWords, getDashboardRecentTracks } = useWordStore();
 
   useEffect(() => {
     fetchAppData();
-  }, [fetchAppData]);
+    checkAttendance();
+    const now = new Date();
+    fetchMonthlyAttendance(now.getFullYear(), now.getMonth() + 1);
+  }, [fetchAppData, checkAttendance, fetchMonthlyAttendance]);
 
   const recentWords: WordCard[] = useMemo(
     () =>
@@ -231,7 +237,7 @@ function MobileDashboard() {
         </MobileStatGrid>
 
         <Section>
-          <AttendanceHeatmap compact />
+          <AttendanceHeatmap attendedDates={attendedDates} compact />
         </Section>
 
         <Section>

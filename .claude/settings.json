@@ -3,7 +3,11 @@
     "allow": [
       "Bash(yarn tsc:*)",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('profile', {}\\), indent=2\\)\\)\")",
-      "Bash(xargs cat *)"
+      "Bash(xargs cat *)",
+      "WebFetch(domain:team-moleback.store)",
+      "Bash(Get-ChildItem -Path \"z:\\\\programming\\\\oneWave\\\\oneWave\\\\src\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)"
     ]
   }
 }
