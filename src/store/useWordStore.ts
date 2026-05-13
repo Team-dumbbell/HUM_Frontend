@@ -225,17 +225,20 @@ export const useWordStore = create<WordStore>((set, get) => ({
             synonymsByWord.get(String(row.id ?? row.word_id ?? word)) ??
             [];
 
+          const firstMusic = unwrapObject(unwrapArray(row.musicList)[0]);
+          const firstExample = unwrapArray(row.examples)[0];
+
           return {
             id: readNumber(row.id ?? row.word_id, index + 1),
             word,
             meaning: readString(row.meaning ?? row.definition ?? row.translation, "-"),
             partOfSpeech: readString(row.part_of_speech ?? row.partOfSpeech ?? row.pos, "기타"),
-            artist: readString(row.artist ?? row.song_artist, "-"),
+            artist: readString(row.artist ?? row.song_artist ?? firstMusic.artist, "-"),
             song: readString(
-              row.song ?? row.song_title ?? row.track_title ?? row.musicTitle ?? row.music_title,
+              row.song ?? row.song_title ?? row.track_title ?? row.musicTitle ?? row.music_title ?? firstMusic.title,
               "-",
             ),
-            example: readString(row.example ?? row.sentence, ""),
+            example: readString(row.example ?? row.sentence ?? firstExample, ""),
             frequency: readNumber(row.frequency ?? row.count ?? row.capture_count, 1),
             addedAt: formatDateLabel(row.created_at ?? row.added_at ?? row.updated_at),
             language: parseLanguage(row.language ?? row.lang, word),

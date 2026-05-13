@@ -6,6 +6,7 @@ import { FaItunesNote } from "react-icons/fa";
 export default function MobileShell(props: {
   title: string;
   totalCount: number;
+  countLabel?: string;
   query: string;
   onChangeQuery: (v: string) => void;
   onAdd?: () => void;
@@ -31,7 +32,7 @@ export default function MobileShell(props: {
           <div>
             <H1>{props.title}</H1>
             <Sub>
-              총 <b>{props.totalCount}</b>개의 단어 저장됨
+              총 <b>{props.totalCount}</b>개의 {props.countLabel ?? "단어"} 저장됨
             </Sub>
           </div>
           {props.onAdd ? (

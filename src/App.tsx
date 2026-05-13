@@ -790,6 +790,11 @@ const MobileToolbar = styled.div`
   overflow-x: auto;
   padding: 0 0 10px;
   margin-bottom: 10px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const MobileSortTabs = styled.div`

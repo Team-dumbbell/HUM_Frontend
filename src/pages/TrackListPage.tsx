@@ -255,6 +255,7 @@ export default function TrackListPage() {
     <MobileShell
       title="최근 캡처된 곡"
       totalCount={visibleTracks.length}
+      countLabel="트랙"
       actionLabel={
         trackSortType === "latest"
           ? "최신순"
@@ -573,6 +574,10 @@ const CardTop = styled.div`
 const Name = styled.h2`
   margin: 0;
   font-size: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 `;
 
 const PlatformBadge = styled.span<{ platform: Platform }>`
@@ -764,6 +769,10 @@ const ModalOverlay = styled.div`
   display: grid;
   place-items: center;
   padding: 20px;
+
+  @media (max-width: 1023px) {
+    padding: 20px 16px calc(20px + 72px);
+  }
 `;
 
 const ModalBox = styled.div`
@@ -777,6 +786,13 @@ const ModalBox = styled.div`
   flex-direction: column;
   gap: 16px;
   max-height: 80dvh;
+  overflow: hidden;
+
+  @media (max-width: 1023px) {
+    max-height: calc(100dvh - 40px - 72px);
+    border-radius: 16px;
+    padding: 20px 16px;
+  }
 `;
 
 const ModalHeader = styled.div`
@@ -846,6 +862,8 @@ const ModalResultList = styled.div`
   gap: 8px;
   overflow-y: auto;
   max-height: 320px;
+  flex: 1;
+  min-height: 0;
 `;
 
 const ModalEmptyText = styled.p<{ error?: boolean }>`
@@ -930,6 +948,11 @@ const MobileToolbar = styled.div`
   overflow-x: auto;
   padding: 0 0 10px;
   margin-bottom: 10px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const MobileSortTabs = styled.div`
