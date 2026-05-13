@@ -280,14 +280,14 @@ export default function TrackListPage() {
                 {track.title.slice(0, 2).toUpperCase()}
               </Cover>
               <MetaBlock>
-                <CardTop>
-                  <Name>{track.title} - {track.artist}</Name>
+                <Name>{track.title} - {track.artist}</Name>
+                <MobileCardFooter>
+                  <MobileCardInfo>
+                    <span>캡처 {track.capturedAt}</span>
+                    <b>단어 {track.extractedWords}개</b>
+                  </MobileCardInfo>
                   <PlatformBadge platform={track.platform}>{platformLabel(track.platform)}</PlatformBadge>
-                </CardTop>
-                <TrackMeta>
-                  <span>캡처 {track.capturedAt}</span>
-                  <b>단어 {track.extractedWords}개</b>
-                </TrackMeta>
+                </MobileCardFooter>
               </MetaBlock>
             </TrackMain>
           </TrackCard>
@@ -550,6 +550,7 @@ const Cover = styled.div`
 const MetaBlock = styled.div`
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 `;
 
 const CardTop = styled.div`
@@ -915,6 +916,41 @@ const ModalGenerateButton = styled.button<{ done?: boolean }>`
   &:disabled {
     opacity: 0.6;
     cursor: default;
+  }
+`;
+
+const MobileCardFooter = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+`;
+
+const MobileCardInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #8f9bb2;
+  font-size: 13px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex-shrink: 1;
+  }
+
+  b {
+    color: ${({ theme }) => theme.color.blue};
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 `;
 
