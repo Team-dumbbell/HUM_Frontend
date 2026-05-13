@@ -187,10 +187,7 @@ export default function TrackListPage() {
   const shellProps = {
     query,
     onChangeQuery: setQuery,
-    onAdd: () =>
-      setTrackSortType((prev) =>
-        prev === "latest" ? "words" : prev === "words" ? "title" : "latest",
-      ),
+    onAdd: () => setShowAddModal(true),
   };
 
   const addModal = showAddModal ? (
@@ -256,13 +253,7 @@ export default function TrackListPage() {
       title="최근 캡처된 곡"
       totalCount={visibleTracks.length}
       countLabel="트랙"
-      actionLabel={
-        trackSortType === "latest"
-          ? "최신순"
-          : trackSortType === "words"
-            ? "단어수"
-            : "제목순"
-      }
+      actionLabel="+ 새 트랙"
       {...shellProps}
     >
       <MobileToolbar>
@@ -270,10 +261,6 @@ export default function TrackListPage() {
         <Chip active={trackPlatformFilter === "YOUTUBE"} onClick={() => setTrackPlatformFilter("YOUTUBE")}>YouTube</Chip>
         <Chip active={trackPlatformFilter === "SPOTIFY"} onClick={() => setTrackPlatformFilter("SPOTIFY")}>Spotify</Chip>
         <Chip active={trackPlatformFilter === "APPLE"} onClick={() => setTrackPlatformFilter("APPLE")}>Apple</Chip>
-        <MobileAddButton type="button" onClick={() => setShowAddModal(true)}>
-          <FiPlus size={15} />
-          새 트랙
-        </MobileAddButton>
       </MobileToolbar>
 
       <MobileSortTabs>
@@ -749,22 +736,6 @@ const AddTrackButton = styled.button`
   white-space: nowrap;
 `;
 
-const MobileAddButton = styled.button`
-  height: 42px;
-  border-radius: 13px;
-  border: 1px solid ${({ theme }) => theme.color.blue};
-  background: ${({ theme }) => theme.color.blue};
-  color: #fff;
-  padding: 0 16px;
-  font-size: 14px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
-  white-space: nowrap;
-  flex: 0 0 auto;
-`;
 
 const ModalOverlay = styled.div`
   position: fixed;
