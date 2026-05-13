@@ -100,11 +100,13 @@ export default function ProfilePage() {
   const isMobile = useMediaQuery("(max-width: 1023px)");
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const { user, profile, fetchAppData, setUserName } = useWordStore();
+  const { user, profile, attendedDates, fetchAppData, setUserName, fetchMonthlyAttendance } = useWordStore();
 
   useEffect(() => {
     fetchAppData();
-  }, [fetchAppData]);
+    const now = new Date();
+    fetchMonthlyAttendance(now.getFullYear(), now.getMonth() + 1);
+  }, [fetchAppData, fetchMonthlyAttendance]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [nameInput, setNameInput] = useState("");
@@ -193,7 +195,7 @@ export default function ProfilePage() {
           </ProfileCard>
 
           <HeatmapSection>
-            <AttendanceHeatmap compact />
+            <AttendanceHeatmap attendedDates={attendedDates} compact />
           </HeatmapSection>
 
           <SettingSectionList />
@@ -274,7 +276,7 @@ export default function ProfilePage() {
           </ProfileCard>
 
           <HeatmapSection>
-            <AttendanceHeatmap />
+            <AttendanceHeatmap attendedDates={attendedDates} />
           </HeatmapSection>
 
           <SettingSectionList />

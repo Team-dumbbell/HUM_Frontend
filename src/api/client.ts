@@ -103,5 +103,9 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   }
   const text = await response.text();
   if (!text.trim()) return undefined as unknown as T;
-  return JSON.parse(text) as T;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return text as unknown as T;
+  }
 }
