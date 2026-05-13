@@ -280,12 +280,12 @@ export default function TrackListPage() {
                 {track.title.slice(0, 2).toUpperCase()}
               </Cover>
               <MetaBlock>
-                <Name>{track.title} - {track.artist}</Name>
+                <MobileTrackTitle>{track.title}</MobileTrackTitle>
+                <MobileTrackArtist>{track.artist}</MobileTrackArtist>
                 <MobileCardFooter>
-                  <MobileCardInfo>
-                    <span>캡처 {track.capturedAt}</span>
-                    <b>단어 {track.extractedWords}개</b>
-                  </MobileCardInfo>
+                  <span>캡처 {track.capturedAt}</span>
+                  <b>단어 {track.extractedWords}개</b>
+                  <MobileMetaSpacer />
                   <PlatformBadge platform={track.platform}>{platformLabel(track.platform)}</PlatformBadge>
                 </MobileCardFooter>
               </MetaBlock>
@@ -550,7 +550,6 @@ const Cover = styled.div`
 const MetaBlock = styled.div`
   flex: 1;
   min-width: 0;
-  overflow: hidden;
 `;
 
 const CardTop = styled.div`
@@ -919,39 +918,47 @@ const ModalGenerateButton = styled.button<{ done?: boolean }>`
   }
 `;
 
+const MobileTrackTitle = styled.h2`
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: ${({ theme }) => theme.color.text};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const MobileTrackArtist = styled.p`
+  margin: 2px 0 6px;
+  font-size: 13px;
+  color: ${({ theme }) => theme.color.subtext};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
 const MobileCardFooter = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
-  margin-top: 6px;
-`;
-
-const MobileCardInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
   color: #8f9bb2;
-  font-size: 13px;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
+  font-size: 12px;
 
   span {
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
-    flex-shrink: 1;
+    flex-shrink: 0;
   }
 
   b {
     color: ${({ theme }) => theme.color.blue};
-    font-size: 13px;
     font-weight: 700;
     white-space: nowrap;
     flex-shrink: 0;
   }
+`;
+
+const MobileMetaSpacer = styled.div`
+  flex: 1;
 `;
 
 const MobileToolbar = styled.div`
