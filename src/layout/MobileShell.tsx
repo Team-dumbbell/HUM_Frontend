@@ -52,8 +52,6 @@ export default function MobileShell(props: {
 
 const Wrap = styled.div`
   min-height: 100%;
-  width: 100%;
-  overflow-x: hidden;
   background: ${({ theme }) => theme.color.bg};
 `;
 
@@ -105,6 +103,7 @@ const Avatar = styled.div`
 
 const Body = styled.main`
   padding: 0 20px;
+  overflow-x: hidden;
 `;
 
 const TitleRow = styled.div`
