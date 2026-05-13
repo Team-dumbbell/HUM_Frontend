@@ -115,6 +115,48 @@ export default function TrackListPage() {
     }
   }, [lyricsQuery, isSearching]);
 
+  useEffect(() => {
+    if (!lyricsQuery.trim()) {
+      setSearchResults([]);
+      setSearchError(false);
+      return;
+    }
+
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        if (cancelled) return;
+        setIsSearching(true);
+        setSearchResults([]);
+        setSearchError(false);
+        try {
+          const results = await searchLyrics(lyricsQuery.trim());
+          if (cancelled) return;
+          const raw = Array.isArray(results) ? results : [];
+          const q = lyricsQuery.trim().toLowerCase();
+          const sorted = [...raw].sort((a, b) => {
+            const aName = a.trackName.toLowerCase();
+            const bName = b.trackName.toLowerCase();
+            const aIdx = aName.indexOf(q);
+            const bIdx = bName.indexOf(q);
+            if (aIdx !== bIdx) return (aIdx === -1 ? Infinity : aIdx) - (bIdx === -1 ? Infinity : bIdx);
+            return aName.localeCompare(bName);
+          });
+          setSearchResults(sorted);
+        } catch {
+          if (!cancelled) setSearchError(true);
+        } finally {
+          if (!cancelled) setIsSearching(false);
+        }
+      })();
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [lyricsQuery]);
+
   const handleGenerate = useCallback(async (track: MusicSearchResult) => {
     if (generatingId !== null) return;
     setGeneratingId(track.id);
