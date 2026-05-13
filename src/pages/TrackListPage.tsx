@@ -19,6 +19,45 @@ import { useWordStore } from "../store/useWordStore";
 
 type Platform = "youtube" | "spotify" | "apple";
 
+async function getAlbumArt(artist: string, title: string): Promise<string | null> {
+  const query = encodeURIComponent(`${artist} ${title}`);
+  try {
+    const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=song&limit=1`);
+    const data = await res.json() as { results?: Array<{ artworkUrl100?: string }> };
+    const imageUrl = data.results?.[0]?.artworkUrl100;
+    return imageUrl?.replace("100x100", "600x600") ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function TrackCover({ artist, title, coverStart, coverEnd }: {
+  artist: string;
+  title: string;
+  coverStart: string;
+  coverEnd: string;
+}) {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void getAlbumArt(artist, title).then((url) => {
+      if (!cancelled) setImageUrl(url);
+    });
+    return () => { cancelled = true; };
+  }, [artist, title]);
+
+  return (
+    <Cover style={imageUrl ? undefined : { background: `linear-gradient(135deg, ${coverStart}, ${coverEnd})` }}>
+      {imageUrl ? (
+        <CoverImg src={imageUrl} alt={title} onError={() => setImageUrl(null)} />
+      ) : (
+        title.slice(0, 2).toUpperCase()
+      )}
+    </Cover>
+  );
+}
+
 const MOBILE_PAGE_SIZE = 4;
 const DESKTOP_PAGE_SIZE = 4;
 
@@ -276,9 +315,7 @@ export default function TrackListPage() {
         {mobileTracks.map((track) => (
           <TrackCard key={track.id} mobile clickable onClick={() => navigate(`/words?trackId=${track.id}`)}>
             <TrackMain>
-              <Cover style={{ background: `linear-gradient(135deg, ${track.coverStart}, ${track.coverEnd})` }}>
-                {track.title.slice(0, 2).toUpperCase()}
-              </Cover>
+              <TrackCover artist={track.artist} title={track.title} coverStart={track.coverStart} coverEnd={track.coverEnd} />
               <MetaBlock>
                 <MobileTrackTitle>{track.title}</MobileTrackTitle>
                 <MobileTrackArtist>{track.artist}</MobileTrackArtist>
@@ -358,9 +395,7 @@ export default function TrackListPage() {
           {desktopTracks.map((track) => (
             <TrackCard key={track.id} clickable onClick={() => navigate(`/words?trackId=${track.id}`)}>
               <TrackMain>
-                <Cover style={{ background: `linear-gradient(135deg, ${track.coverStart}, ${track.coverEnd})` }}>
-                  {track.title.slice(0, 2).toUpperCase()}
-                </Cover>
+                <TrackCover artist={track.artist} title={track.title} coverStart={track.coverStart} coverEnd={track.coverEnd} />
                 <MetaBlock>
                   <CardTop>
                     <Name>{track.title} - {track.artist}</Name>
@@ -545,6 +580,13 @@ const Cover = styled.div`
   place-items: center;
   font-weight: 700;
   font-size: 14px;
+  overflow: hidden;
+`;
+
+const CoverImg = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 `;
 
 const MetaBlock = styled.div`
