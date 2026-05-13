@@ -1,19 +1,12 @@
 ﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "@emotion/styled";
-import { FiBookOpen, FiHome, FiLoader, FiMusic, FiPlus, FiSearch, FiUser, FiX } from "react-icons/fi";
-import { useLocation, useNavigate } from "react-router-dom";
+import { FiBookOpen, FiLoader, FiMusic, FiPlus, FiSearch, FiX } from "react-icons/fi";
 import { generateVocab, searchLyrics, type MusicSearchResult } from "../api/lyrics";
 import { useMediaQuery } from "../shared/hooks/useMediaQueryl";
 import WebSidebar from "../layout/WebSidebar";
+import MobileBottomNav from "../layout/MobileBottomNav";
 import { useWordStore } from "../store/useWordStore";
 import AttendanceHeatmap from "../shared/components/AttendanceHeatmap";
-
-type NavItem = {
-  id: "dashboard" | "words" | "tracks" | "profile";
-  label: string;
-  path: string;
-  icon: typeof FiHome;
-};
 
 type WordCard = {
   id: number;
@@ -28,13 +21,6 @@ type TrackCard = {
   artist: string;
   artwork: string;
 };
-
-const NAV_ITEMS: NavItem[] = [
-  { id: "dashboard", label: "대시보드", path: "/dashboard", icon: FiHome },
-  { id: "words", label: "단어장", path: "/words", icon: FiBookOpen },
-  { id: "tracks", label: "트랙", path: "/tracks", icon: FiMusic },
-  { id: "profile", label: "프로필", path: "/mypage", icon: FiUser },
-];
 
 export default function DashboardPage() {
   const isMobile = useMediaQuery("(max-width: 1023px)");
@@ -301,8 +287,6 @@ function DesktopDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
 }
 
 function MobileDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
-  const navigate = useNavigate();
-  const { pathname } = useLocation();
   const { user, dashboard, attendedDates, fetchAppData, checkAttendance, fetchMonthlyAttendance, getDashboardRecentWords, getDashboardRecentTracks } = useWordStore();
 
   useEffect(() => {
@@ -333,13 +317,6 @@ function MobileDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
       })),
     [getDashboardRecentTracks],
   );
-
-  const isActive = (id: NavItem["id"]) => {
-    if (id === "words") return pathname.startsWith("/words");
-    if (id === "tracks") return pathname.startsWith("/tracks");
-    if (id === "dashboard") return pathname.startsWith("/dashboard");
-    return pathname.startsWith("/mypage") || pathname.startsWith("/profile");
-  };
 
   return (
     <MobileWrap>
@@ -423,22 +400,7 @@ function MobileDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
         </MobileAddTrackButton>
       </MobileInner>
 
-      <BottomNav>
-        {NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
-          return (
-            <BottomNavItem
-              key={item.id}
-              active={isActive(item.id)}
-              onClick={() => navigate(item.path)}
-              type="button"
-            >
-              <Icon size={20} />
-              <span>{item.label}</span>
-            </BottomNavItem>
-          );
-        })}
-      </BottomNav>
+      <MobileBottomNav />
     </MobileWrap>
   );
 }
@@ -714,32 +676,6 @@ const MobileHeader = styled.header`
   gap: 12px;
 `;
 
-const BottomNav = styled.nav`
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 72px;
-  background: ${({ theme }) => theme.color.surface};
-  border-top: 1px solid ${({ theme }) => theme.color.line};
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  z-index: 20;
-`;
-
-const BottomNavItem = styled.button<{ active?: boolean }>`
-  border: 0;
-  background: transparent;
-  color: ${({ theme, active }) => (active ? theme.color.blue : "#98a2b5")};
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: ${({ active }) => (active ? 700 : 600)};
-  cursor: pointer;
-`;
 
 const SectionActions = styled.div`
   display: flex;
