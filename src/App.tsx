@@ -623,8 +623,8 @@ const Card = styled.article<{ mobile?: boolean; clickable?: boolean }>`
   background: ${({ theme }) => theme.color.surface};
   border: 1px solid ${({ theme }) => theme.color.line};
   box-shadow: ${({ theme }) => theme.shadow.sm};
-  padding: ${({ mobile }) => (mobile ? "22px 20px" : "21px")};
-  min-height: ${({ mobile }) => (mobile ? "208px" : "231px")};
+  padding: ${({ mobile }) => (mobile ? "20px 18px" : "21px")};
+  min-height: ${({ mobile }) => (mobile ? "170px" : "231px")};
   cursor: ${({ clickable }) => (clickable ? "pointer" : "default")};
 `;
 
@@ -664,6 +664,10 @@ const DeleteBtn = styled.button`
 const Word = styled.h2`
   margin: 0;
   font-size: 30px;
+
+  @media (max-width: 1023px) {
+    font-size: 22px;
+  }
 `;
 
 const Example = styled.span`
@@ -686,6 +690,12 @@ const Badge = styled.span`
   font-size: 18px;
   font-weight: 700;
   padding: 6px 10px;
+
+  @media (max-width: 1023px) {
+    font-size: 12px;
+    padding: 4px 8px;
+    min-width: 36px;
+  }
 `;
 
 const Meaning = styled.p`
@@ -693,6 +703,10 @@ const Meaning = styled.p`
   color: ${({ theme }) => theme.color.blue};
   font-size: 21px;
   font-weight: 700;
+
+  @media (max-width: 1023px) {
+    font-size: 16px;
+  }
 `;
 
 const TrackRow = styled.div`
@@ -706,6 +720,10 @@ const TrackRow = styled.div`
   gap: 8px;
   font-size: 18px;
   margin-bottom: 15px;
+
+  @media (max-width: 1023px) {
+    font-size: 13px;
+  }
 `;
 
 const Meta = styled.div`
@@ -718,6 +736,10 @@ const Meta = styled.div`
   b {
     color: #10162c;
     margin-left: 3px;
+  }
+
+  @media (max-width: 1023px) {
+    font-size: 13px;
   }
 `;
 

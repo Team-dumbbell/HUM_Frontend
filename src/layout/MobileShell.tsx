@@ -85,7 +85,7 @@ const Logo = styled.div`
 
 const BrandName = styled.div`
   font-weight: 800;
-  font-size: 34px;
+  font-size: 22px;
   color: #0d172f;
 `;
 
@@ -114,12 +114,12 @@ const TitleRow = styled.div`
 
 const H1 = styled.h1`
   margin: 0;
-  font-size: 42px;
+  font-size: 26px;
 `;
 
 const Sub = styled.p`
   margin: 4px 0 0;
-  font-size: 20px;
+  font-size: 14px;
   color: ${({ theme }) => theme.color.subtext};
   b {
     color: ${({ theme }) => theme.color.blue};

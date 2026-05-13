@@ -578,6 +578,10 @@ const Name = styled.h2`
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+
+  @media (max-width: 1023px) {
+    font-size: 16px;
+  }
 `;
 
 const PlatformBadge = styled.span<{ platform: Platform }>`

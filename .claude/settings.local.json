@@ -6,7 +6,10 @@
       "WebFetch(domain:api.github.com)",
       "Bash(yarn build:*)",
       "Bash(curl -s \"http://team-moleback.store/swagger-ui/index.html\")",
-      "Bash(curl -s \"http://team-moleback.store/v3/api-docs\")"
+      "Bash(curl -s \"http://team-moleback.store/v3/api-docs\")",
+      "Bash(npx tsc *)",
+      "PowerShell(Get-Command node, npm, yarn, npx -ErrorAction SilentlyContinue)",
+      "PowerShell($env:PATH)"
     ]
   }
 }
