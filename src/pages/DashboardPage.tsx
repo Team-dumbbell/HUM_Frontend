@@ -1,6 +1,5 @@
 ﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "@emotion/styled";
-import { css } from "@emotion/react";
 import { FiBookOpen, FiLoader, FiMusic, FiPlus, FiSearch, FiX } from "react-icons/fi";
 import { generateVocab, searchLyrics, type MusicSearchResult } from "../api/lyrics";
 import { useMediaQuery } from "../shared/hooks/useMediaQueryl";
@@ -198,7 +197,7 @@ export default function DashboardPage() {
 }
 
 function DesktopDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
-  const { user, dashboard, attendedDates, isLoading, fetchAppData, checkAttendance, fetchMonthlyAttendance, getDashboardRecentWords, getDashboardRecentTracks } = useWordStore();
+  const { user, dashboard, attendedDates, isLoading, wordList, trackList, fetchAppData, checkAttendance, fetchMonthlyAttendance, getDashboardRecentWords, getDashboardRecentTracks } = useWordStore();
 
   useEffect(() => {
     fetchAppData();
@@ -215,7 +214,7 @@ function DesktopDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
         meaning: item.meaning,
         partOfSpeech: item.partOfSpeech,
       })),
-    [getDashboardRecentWords],
+    [getDashboardRecentWords, wordList],
   );
 
   const recentTracks: TrackCard[] = useMemo(
@@ -227,7 +226,7 @@ function DesktopDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
         coverStart: track.coverStart,
         coverEnd: track.coverEnd,
       })),
-    [getDashboardRecentTracks],
+    [getDashboardRecentTracks, trackList],
   );
 
   const showWordSkeleton = isLoading && recentWords.length === 0;
@@ -334,7 +333,7 @@ function DesktopDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
 }
 
 function MobileDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
-  const { user, dashboard, attendedDates, isLoading, fetchAppData, checkAttendance, fetchMonthlyAttendance, getDashboardRecentWords, getDashboardRecentTracks } = useWordStore();
+  const { user, dashboard, attendedDates, isLoading, wordList, trackList, fetchAppData, checkAttendance, fetchMonthlyAttendance, getDashboardRecentWords, getDashboardRecentTracks } = useWordStore();
 
   useEffect(() => {
     fetchAppData();
@@ -351,7 +350,7 @@ function MobileDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
         meaning: item.meaning,
         partOfSpeech: item.partOfSpeech,
       })),
-    [getDashboardRecentWords],
+    [getDashboardRecentWords, wordList],
   );
 
   const recentTracks: TrackCard[] = useMemo(
@@ -363,7 +362,7 @@ function MobileDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
         coverStart: track.coverStart,
         coverEnd: track.coverEnd,
       })),
-    [getDashboardRecentTracks],
+    [getDashboardRecentTracks, trackList],
   );
 
   const showWordSkeleton = isLoading && recentWords.length === 0;
@@ -963,20 +962,17 @@ const ModalGenerateButton = styled.button<{ done?: boolean }>`
   }
 `;
 
-const shimmer = css`
-  @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-`;
-
 const WordSkeletonCard = styled.div`
   height: 80px;
   border-radius: 16px;
   background: linear-gradient(90deg, #f0f2f5 25%, #e6eaf0 50%, #f0f2f5 75%);
   background-size: 200% 100%;
-  animation: shimmer 1.4s ease-in-out infinite;
-  ${shimmer}
+  animation: skeletonShimmer 1.4s ease-in-out infinite;
+
+  @keyframes skeletonShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
 `;
 
 const TrackSkeletonCard = styled.div`
@@ -984,8 +980,12 @@ const TrackSkeletonCard = styled.div`
   border-radius: 16px;
   background: linear-gradient(90deg, #f0f2f5 25%, #e6eaf0 50%, #f0f2f5 75%);
   background-size: 200% 100%;
-  animation: shimmer 1.4s ease-in-out infinite;
-  ${shimmer}
+  animation: skeletonShimmer 1.4s ease-in-out infinite;
+
+  @keyframes skeletonShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
 `;
 
 const LoadingIcon = styled(FiLoader)`
