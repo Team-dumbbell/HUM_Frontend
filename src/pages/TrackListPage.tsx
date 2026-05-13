@@ -551,6 +551,7 @@ const TrackMain = styled.div`
 const Cover = styled.div`
   width: 64px;
   height: 64px;
+  flex-shrink: 0;
   border-radius: 12px;
   color: #fff;
   display: grid;
