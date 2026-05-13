@@ -62,6 +62,7 @@ type WordStore = {
   user: UserData;
   profile: ProfileData;
   attendedDates: string[];
+  isLoading: boolean;
 
   query: string;
   sortType: SortType;
@@ -110,6 +111,7 @@ export const useWordStore = create<WordStore>((set, get) => ({
     totalCapturedTracks: 0,
   },
   attendedDates: [],
+  isLoading: true,
 
   query: "",
   sortType: "latest",
@@ -153,6 +155,7 @@ export const useWordStore = create<WordStore>((set, get) => ({
       return;
     }
 
+    set({ isLoading: true });
     appDataRequest = (async () => {
       const tokenProfile = readProfileFromStoredToken();
       let hasSuccessfulResponse = false;
@@ -271,6 +274,7 @@ export const useWordStore = create<WordStore>((set, get) => ({
       }
     })().finally(() => {
       appDataRequest = null;
+      set({ isLoading: false });
     });
 
     await appDataRequest;

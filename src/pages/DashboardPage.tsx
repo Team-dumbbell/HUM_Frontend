@@ -1,5 +1,6 @@
 ﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "@emotion/styled";
+import { css } from "@emotion/react";
 import { FiBookOpen, FiLoader, FiMusic, FiPlus, FiSearch, FiX } from "react-icons/fi";
 import { generateVocab, searchLyrics, type MusicSearchResult } from "../api/lyrics";
 import { useMediaQuery } from "../shared/hooks/useMediaQueryl";
@@ -19,8 +20,44 @@ type TrackCard = {
   id: number;
   title: string;
   artist: string;
-  artwork: string;
+  coverStart: string;
+  coverEnd: string;
 };
+
+async function getAlbumArt(artist: string, title: string): Promise<string | null> {
+  const query = encodeURIComponent(`${artist} ${title}`);
+  try {
+    const res = await fetch(`https://itunes.apple.com/search?term=${query}&entity=song&limit=1`);
+    const data = await res.json() as { results?: Array<{ artworkUrl100?: string }> };
+    const imageUrl = data.results?.[0]?.artworkUrl100;
+    return imageUrl?.replace("100x100", "600x600") ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function DashboardTrackCover({ artist, title, coverStart, coverEnd }: {
+  artist: string;
+  title: string;
+  coverStart: string;
+  coverEnd: string;
+}) {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void getAlbumArt(artist, title).then((url) => {
+      if (!cancelled) setImageUrl(url);
+    });
+    return () => { cancelled = true; };
+  }, [artist, title]);
+
+  return (
+    <TrackArt style={imageUrl ? undefined : { background: `linear-gradient(145deg, ${coverStart}, ${coverEnd})` }}>
+      {imageUrl && <TrackArtImg src={imageUrl} alt={title} onError={() => setImageUrl(null)} />}
+    </TrackArt>
+  );
+}
 
 export default function DashboardPage() {
   const isMobile = useMediaQuery("(max-width: 1023px)");
@@ -161,7 +198,7 @@ export default function DashboardPage() {
 }
 
 function DesktopDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
-  const { user, dashboard, attendedDates, fetchAppData, checkAttendance, fetchMonthlyAttendance, getDashboardRecentWords, getDashboardRecentTracks } = useWordStore();
+  const { user, dashboard, attendedDates, isLoading, fetchAppData, checkAttendance, fetchMonthlyAttendance, getDashboardRecentWords, getDashboardRecentTracks } = useWordStore();
 
   useEffect(() => {
     fetchAppData();
@@ -187,10 +224,14 @@ function DesktopDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
         id: track.id,
         title: track.title,
         artist: track.artist,
-        artwork: `linear-gradient(145deg, ${track.coverStart}, ${track.coverEnd})`,
+        coverStart: track.coverStart,
+        coverEnd: track.coverEnd,
       })),
     [getDashboardRecentTracks],
   );
+
+  const showWordSkeleton = isLoading && recentWords.length === 0;
+  const showTrackSkeleton = isLoading && recentTracks.length === 0;
 
   return (
     <DesktopLayout>
@@ -242,15 +283,18 @@ function DesktopDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
             </SectionHead>
 
             <DesktopWordGrid>
-              {recentWords.map((item) => (
-                <WordCardBox key={item.id}>
-                  <WordTop>
-                    <WordName>{item.word}</WordName>
-                    <PartBadge>{item.partOfSpeech}</PartBadge>
-                  </WordTop>
-                  <WordMeaning>{item.meaning}</WordMeaning>
-                </WordCardBox>
-              ))}
+              {showWordSkeleton
+                ? Array.from({ length: 3 }).map((_, i) => <WordSkeletonCard key={i} />)
+                : recentWords.map((item) => (
+                  <WordCardBox key={item.id}>
+                    <WordTop>
+                      <WordName>{item.word}</WordName>
+                      <PartBadge>{item.partOfSpeech}</PartBadge>
+                    </WordTop>
+                    <WordMeaning>{item.meaning}</WordMeaning>
+                  </WordCardBox>
+                ))
+              }
             </DesktopWordGrid>
           </Section>
 
@@ -267,17 +311,20 @@ function DesktopDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
             </SectionHead>
 
             <TrackList>
-              {recentTracks.map((item) => (
-                <TrackRow key={item.id}>
-                  <TrackCore>
-                    <TrackArt style={{ background: item.artwork }} />
-                    <TrackInfo>
-                      <TrackTitle>{item.title}</TrackTitle>
-                      <TrackArtist>{item.artist}</TrackArtist>
-                    </TrackInfo>
-                  </TrackCore>
-                </TrackRow>
-              ))}
+              {showTrackSkeleton
+                ? Array.from({ length: 3 }).map((_, i) => <TrackSkeletonCard key={i} />)
+                : recentTracks.map((item) => (
+                  <TrackRow key={item.id}>
+                    <TrackCore>
+                      <DashboardTrackCover artist={item.artist} title={item.title} coverStart={item.coverStart} coverEnd={item.coverEnd} />
+                      <TrackInfo>
+                        <TrackTitle>{item.title}</TrackTitle>
+                        <TrackArtist>{item.artist}</TrackArtist>
+                      </TrackInfo>
+                    </TrackCore>
+                  </TrackRow>
+                ))
+              }
             </TrackList>
           </Section>
         </DesktopContent>
@@ -287,7 +334,7 @@ function DesktopDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
 }
 
 function MobileDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
-  const { user, dashboard, attendedDates, fetchAppData, checkAttendance, fetchMonthlyAttendance, getDashboardRecentWords, getDashboardRecentTracks } = useWordStore();
+  const { user, dashboard, attendedDates, isLoading, fetchAppData, checkAttendance, fetchMonthlyAttendance, getDashboardRecentWords, getDashboardRecentTracks } = useWordStore();
 
   useEffect(() => {
     fetchAppData();
@@ -313,10 +360,14 @@ function MobileDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
         id: track.id,
         title: track.title,
         artist: track.artist,
-        artwork: `linear-gradient(145deg, ${track.coverStart}, ${track.coverEnd})`,
+        coverStart: track.coverStart,
+        coverEnd: track.coverEnd,
       })),
     [getDashboardRecentTracks],
   );
+
+  const showWordSkeleton = isLoading && recentWords.length === 0;
+  const showTrackSkeleton = isLoading && recentTracks.length === 0;
 
   return (
     <MobileWrap>
@@ -362,15 +413,18 @@ function MobileDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
             <ViewAllLink href="#">전체보기</ViewAllLink>
           </SectionHead>
           <MobileWordList>
-            {recentWords.map((item) => (
-              <WordCardBox key={item.id}>
-                <WordTop>
-                  <WordName>{item.word}</WordName>
-                  <PartBadge>{item.partOfSpeech}</PartBadge>
-                </WordTop>
-                <WordMeaning>{item.meaning}</WordMeaning>
-              </WordCardBox>
-            ))}
+            {showWordSkeleton
+              ? Array.from({ length: 2 }).map((_, i) => <WordSkeletonCard key={i} />)
+              : recentWords.map((item) => (
+                <WordCardBox key={item.id}>
+                  <WordTop>
+                    <WordName>{item.word}</WordName>
+                    <PartBadge>{item.partOfSpeech}</PartBadge>
+                  </WordTop>
+                  <WordMeaning>{item.meaning}</WordMeaning>
+                </WordCardBox>
+              ))
+            }
           </MobileWordList>
         </Section>
 
@@ -380,17 +434,20 @@ function MobileDashboard({ onOpenAddTrack }: { onOpenAddTrack: () => void }) {
             <ViewAllLink href="#">전체보기</ViewAllLink>
           </SectionHead>
           <TrackList>
-            {recentTracks.map((item) => (
-              <TrackRow key={item.id}>
-                <TrackCore>
-                  <TrackArt style={{ background: item.artwork }} />
-                  <TrackInfo>
-                    <TrackTitle>{item.title}</TrackTitle>
-                    <TrackArtist>{item.artist}</TrackArtist>
-                  </TrackInfo>
-                </TrackCore>
-              </TrackRow>
-            ))}
+            {showTrackSkeleton
+              ? Array.from({ length: 2 }).map((_, i) => <TrackSkeletonCard key={i} />)
+              : recentTracks.map((item) => (
+                <TrackRow key={item.id}>
+                  <TrackCore>
+                    <DashboardTrackCover artist={item.artist} title={item.title} coverStart={item.coverStart} coverEnd={item.coverEnd} />
+                    <TrackInfo>
+                      <TrackTitle>{item.title}</TrackTitle>
+                      <TrackArtist>{item.artist}</TrackArtist>
+                    </TrackInfo>
+                  </TrackCore>
+                </TrackRow>
+              ))
+            }
           </TrackList>
         </Section>
 
@@ -638,8 +695,17 @@ const TrackCore = styled.div`
 const TrackArt = styled.div`
   width: 66px;
   height: 66px;
+  flex: 0 0 66px;
   border-radius: 10px;
   box-shadow: 0 8px 14px rgba(4, 28, 61, 0.12);
+  overflow: hidden;
+`;
+
+const TrackArtImg = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 `;
 
 const TrackInfo = styled.div`
@@ -895,6 +961,31 @@ const ModalGenerateButton = styled.button<{ done?: boolean }>`
     opacity: 0.6;
     cursor: default;
   }
+`;
+
+const shimmer = css`
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+`;
+
+const WordSkeletonCard = styled.div`
+  height: 80px;
+  border-radius: 16px;
+  background: linear-gradient(90deg, #f0f2f5 25%, #e6eaf0 50%, #f0f2f5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  ${shimmer}
+`;
+
+const TrackSkeletonCard = styled.div`
+  height: 86px;
+  border-radius: 16px;
+  background: linear-gradient(90deg, #f0f2f5 25%, #e6eaf0 50%, #f0f2f5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  ${shimmer}
 `;
 
 const LoadingIcon = styled(FiLoader)`
